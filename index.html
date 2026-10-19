@@ -1,15 +1,171 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ebice.site</title>
-    
-    <!-- Icono que aparecerá al lado del dominio en la pestaña (favicon) -->
-    <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ebice - Descargador de Videos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcB77);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+    input {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+    input:focus { border-color: #6bcB77; box-shadow: 0 0 0 3px rgba(107,203,119,0.2); }
+    button {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d);
+      color: #111;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255,107,107,0.4); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    #resultado {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.3);
+      display: none;
+    }
+    #resultado.show { display: block; }
+    .video-preview {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .video-preview img {
+      width: 120px;
+      border-radius: 8px;
+    }
+    .video-preview .info h3 { font-size: 0.95rem; margin-bottom: 5px; }
+    .video-preview .info p { font-size: 0.8rem; color: #aaa; }
+    .btn-download {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 12px 20px;
+      background: #6bcB77;
+      color: #111;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .btn-download:hover { background: #5ab566; }
+    .error { color: #ff6b6b; text-align: center; }
+    .loader {
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid #ffd93d;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 15px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    footer { text-align: center; margin-top: 25px; color: #666; font-size: 0.8rem; }
+  </style>
 </head>
-<body style="font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 50px;">
-    <h1 style="color: #333;">¡Bienvenidos a ebice.site!</h1>
-    <p style="color: #666; font-size: 18px;">Mi nueva página web está oficialmente en construcción. 🚀</p>
+<body>
+  <div class="container">
+    <h1>ebice</h1>
+    <p class="subtitle">Descarga videos de YouTube de forma rápida</p>
+
+    <input type="text" id="url" placeholder="Pega aquí la URL del video de YouTube..." />
+    <button id="btn" onclick="descargar()">Descargar Video</button>
+
+    <div id="resultado"></div>
+
+    <footer>© 2025 ebice · Solo para uso personal</footer>
+  </div>
+
+  <script>
+    async function descargar() {
+      const url = document.getElementById('url').value.trim();
+      const resultado = document.getElementById('resultado');
+      const btn = document.getElementById('btn');
+
+      if (!url) {
+        resultado.className = 'show';
+        resultado.innerHTML = '<p class="error">Por favor, introduce una URL válida</p>';
+        return;
+      }
+
+      btn.disabled = true;
+      resultado.className = 'show';
+      resultado.innerHTML = '<div class="loader"></div><p style="text-align:center;color:#aaa">Procesando video...</p>';
+
+      try {
+        // Usando API pública (puede dejar de funcionar, ver notas abajo)
+        const respuesta = await fetch(`https://api.cobalt.tools/api/json`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ url: url, vQuality: '720' })
+        });
+
+        const data = await respuesta.json();
+
+        if (data.status === 'error' || !data.url) {
+          throw new Error('No se pudo procesar el video');
+        }
+
+        resultado.innerHTML = `
+          <p style="margin-bottom:10px;color:#6bcB77">✅ Video listo</p>
+          <a class="btn-download" href="${data.url}" target="_blank" rel="noopener">⬇ Descargar video</a>
+        `;
+      } catch (err) {
+        resultado.innerHTML = `<p class="error">❌ Error: ${err.message}<br><small>Prueba con otro video o más tarde.</small></p>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
