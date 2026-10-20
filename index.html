@@ -1,908 +1,452 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ebice - Free Online File Converter & Media Utilities</title>
-    <meta name="description" content="Convert images to PNG, JPG, WEBP, and audio files to MP3, WAV, OGG directly in your browser. Fast, secure, free, and private.">
-    
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ebice.site — YouTube Downloader</title>
+  <meta name="description" content="Download YouTube videos as MP4 or MP3. Fast, free, and simple.">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811"
+          crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-7924204418079811">
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #14141f;
+      --border: #2a2a3a;
+      --text: #e8e8f0;
+      --muted: #8888a0;
+      --accent: #6c5ce7;
+      --accent-hover: #7f6ff0;
+      --radius: 12px;
+    }
 
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Glassmorphism Styles */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.15);
-        }
+    /* ---------- Header ---------- */
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    header .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    header .logo span { color: var(--accent); }
+    header nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-left: 20px;
+      transition: color 0.2s;
+    }
+    header nav a:hover { color: var(--text); }
 
-        /* Animated Gradient Background Glow */
-        .glow-bg {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            filter: blur(90px);
-            opacity: 0.25;
-            z-index: -1;
-            pointer-events: none;
-        }
+    /* ---------- Main ---------- */
+    main {
+      flex: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 48px 24px 80px;
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #a5b4fc;
-            border-radius: 4px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #334155;
-        }
-    </style>
+    .hero { text-align: center; margin-bottom: 40px; }
+    .hero h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--muted); font-size: 1.05rem; }
+
+    /* ---------- Download Card ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group input[type="url"] {
+      flex: 1;
+      min-width: 240px;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: var(--accent); }
+    .input-group input::placeholder { color: var(--muted); }
+
+    .btn {
+      padding: 14px 28px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .format-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .format-option {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .format-option:hover { border-color: var(--muted); }
+    .format-option.active {
+      border-color: var(--accent);
+      background: rgba(108, 92, 231, 0.1);
+    }
+    .format-option .fmt-label { font-weight: 600; font-size: 0.95rem; }
+    .format-option .fmt-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ---------- Status / Result ---------- */
+    #status {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    #status.info { display: block; background: rgba(108,92,231,0.12); border: 1px solid rgba(108,92,231,0.3); color: #b8b0f0; }
+    #status.error { display: block; background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.3); color: #e88; }
+    #status.success { display: block; background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: #8e8; }
+
+    #status a { color: #fff; font-weight: 600; }
+
+    /* ---------- Ad Slot ---------- */
+    .ad-container {
+      margin: 32px 0;
+      min-height: 90px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .ad-container ins { display: block; width: 100%; }
+
+    /* ---------- Footer ---------- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: underline; margin: 0 8px; }
+    footer a:hover { color: var(--text); }
+
+    /* ---------- Cookie Banner ---------- */
+    #cookie-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+    }
+    #cookie-banner.show { display: block; }
+    .cookie-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+    .cookie-inner p {
+      flex: 1;
+      min-width: 240px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .cookie-inner p a { color: var(--accent); }
+    .cookie-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-sm {
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .btn-sm.accept { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-sm.accept:hover { background: var(--accent-hover); }
+    .btn-sm.reject:hover { background: var(--border); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.6rem; }
+      .card { padding: 22px; }
+      .input-group { flex-direction: column; }
+      .btn { width: 100%; }
+      .cookie-inner { flex-direction: column; align-items: stretch; }
+      .cookie-actions { justify-content: stretch; }
+      .cookie-actions .btn-sm { flex: 1; }
+    }
+  </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 relative overflow-x-hidden">
+<body>
 
-    <!-- Ambient Glowing Background Bubbles -->
-    <div class="glow-bg bg-indigo-500 top-[-50px] left-[-50px]"></div>
-    <div class="glow-bg bg-purple-500 top-[40%] right-[-100px]"></div>
-    <div class="glow-bg bg-blue-500 bottom-[-50px] left-[20%]"></div>
+<header>
+  <div class="logo">ebice<span>.site</span></div>
+  <nav>
+    <a href="privacy.html">Privacy</a>
+    <a href="cookies.html">Cookies</a>
+  </nav>
+</header>
 
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-40 glass border-b border-slate-200/50 dark:border-slate-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <a href="#" onclick="showHomeView()" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-                    E
-                </div>
-                <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-                    Ebice
-                </span>
-            </a>
+<main>
+  <div class="hero">
+    <h1>Download <span>YouTube</span> Videos</h1>
+    <p>Choose MP4 video or MP3 audio. Paste a link to get started.</p>
+  </div>
 
-            <!-- Quick Navigation -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                <a href="#image-tools" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Image Tools</a>
-                <a href="#audio-tools" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Audio Tools</a>
-                <a href="#doc-tools" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Documents</a>
-                <button onclick="openModal('setup-modal')" class="text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1">
-                    <i class="fa-brands fa-github text-base"></i>
-                    <span>Deployment Guide</span>
-                </button>
-            </nav>
-
-            <!-- Actions Right -->
-            <div class="flex items-center space-x-3">
-                <!-- Dark / Light Theme Toggle -->
-                <button id="theme-toggle" class="p-2.5 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Toggle Dark/Light Mode">
-                    <i id="theme-toggle-dark-icon" class="hidden fas fa-moon text-lg"></i>
-                    <i id="theme-toggle-light-icon" class="hidden fas fa-sun text-lg"></i>
-                </button>
-                
-                <a href="#converters" class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg">
-                    Start Converting
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Google AdSense - Top Banner Section -->
-    <div class="max-w-7xl mx-auto px-4 mt-4 w-full">
-        <div class="bg-slate-200/40 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-2 text-center">
-            <span class="text-xs text-slate-400 uppercase tracking-widest block mb-1">Advertisement</span>
-            <!-- AdSense Code Container -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-7924204418079811"
-                 data-ad-slot="1234567890"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
+  <!-- Download Card -->
+  <div class="card">
+    <div class="input-group">
+      <input type="url" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+      <button class="btn" id="downloadBtn" onclick="startDownload()">Download</button>
     </div>
 
-    <!-- MAIN HOME VIEW CONTENT -->
-    <main id="main-content" class="flex-grow">
-        <!-- Hero Section -->
-        <section class="py-16 md:py-24 px-4 text-center relative overflow-hidden">
-            <div class="max-w-4xl mx-auto">
-                <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50 mb-6">
-                    <i class="fas fa-bolt text-indigo-500"></i>
-                    <span>100% Client-Side Fast & Secure Conversion</span>
-                </span>
-
-                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-6">
-                    Convert Files Instantly on <span class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Ebice</span>
-                </h1>
-
-                <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                    Transform images, audio files, and documents directly in your browser without uploading files to remote servers. Free, private, and unlimited.
-                </p>
-
-                <!-- Search / Filter Quick Tools -->
-                <div class="max-w-md mx-auto relative mb-12">
-                    <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
-                    <input type="text" id="tool-search" onkeyup="filterTools()" placeholder="Search converter (e.g., MP3, PNG, JPG, WEBP)..." class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm text-sm transition-all">
-                </div>
-            </div>
-        </section>
-
-        <!-- Tool Cards Section -->
-        <section id="converters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-            
-            <!-- Category 1: Image Converters -->
-            <div class="mb-12" id="image-tools">
-                <div class="flex items-center space-x-3 mb-6">
-                    <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                        <i class="fas fa-image text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Image Tools</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Convert, resize, and optimize images directly in your browser.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Tool Card: Image to PNG -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="image to png converter">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-lg">High Quality</span>
-                                <i class="fas fa-file-image text-2xl text-indigo-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Image to PNG</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert any image (JPG, WEBP, GIF, BMP) into lossless PNG format.</p>
-                        </div>
-                        <button onclick="openConverter('image-to-png', 'Image to PNG Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-
-                    <!-- Tool Card: Image to JPG -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="image to jpg jpeg converter">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-lg">Popular</span>
-                                <i class="fas fa-file-jpg text-2xl text-blue-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Image to JPG</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Compress and convert images into standard JPG files with quality settings.</p>
-                        </div>
-                        <button onclick="openConverter('image-to-jpg', 'Image to JPG Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-
-                    <!-- Tool Card: WEBP Converter -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="image to webp converter modern web">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 rounded-lg">Web Optimized</span>
-                                <i class="fas fa-globe text-2xl text-purple-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Image to WEBP</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert images into modern, ultra-lightweight WEBP format for faster web speed.</p>
-                        </div>
-                        <button onclick="openConverter('image-to-webp', 'Image to WEBP Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Google AdSense Mid Banner -->
-            <div class="my-10 bg-slate-200/40 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-2 text-center">
-                <span class="text-xs text-slate-400 uppercase tracking-widest block mb-1">Sponsored Content</span>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-7924204418079811"
-                     data-ad-slot="0987654321"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-
-            <!-- Category 2: Audio Tools -->
-            <div class="mb-12" id="audio-tools">
-                <div class="flex items-center space-x-3 mb-6">
-                    <div class="p-2.5 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
-                        <i class="fas fa-music text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Audio Tools</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Extract audio, convert between audio formats, and adjust bitrate.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Tool Card: Audio to MP3 -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="audio to mp3 converter extractor">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-lg">Universal</span>
-                                <i class="fas fa-file-audio text-2xl text-rose-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Audio to MP3</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert video or audio files (WAV, OGG, M4A, MP4) directly to MP3.</p>
-                        </div>
-                        <button onclick="openConverter('audio-to-mp3', 'Audio/Video to MP3 Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-
-                    <!-- Tool Card: Audio to WAV -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="audio to wav converter uncompressed">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-lg">Lossless Audio</span>
-                                <i class="fas fa-wave-square text-2xl text-amber-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Audio to WAV</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert media into uncompressed WAV format for editing and audio production.</p>
-                        </div>
-                        <button onclick="openConverter('audio-to-wav', 'Audio to WAV Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-
-                    <!-- Tool Card: Audio to OGG -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="audio to ogg converter vorbis">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 rounded-lg">Open Format</span>
-                                <i class="fas fa-record-vinyl text-2xl text-teal-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Audio to OGG</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert sound tracks into Ogg Vorbis format for gaming and applications.</p>
-                        </div>
-                        <button onclick="openConverter('audio-to-ogg', 'Audio to OGG Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Category 3: Document & Text Tools -->
-            <div class="mb-12" id="doc-tools">
-                <div class="flex items-center space-x-3 mb-6">
-                    <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-                        <i class="fas fa-file-alt text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Document & Text Tools</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Quick document conversion and text formatting utilities.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tool Card: Text/HTML to PDF -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="text doc html to pdf converter">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-lg">Document</span>
-                                <i class="fas fa-file-pdf text-2xl text-red-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Text to PDF</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Type or paste text/HTML notes and export directly into a printable PDF/Document file.</p>
-                        </div>
-                        <button onclick="openConverter('text-to-pdf', 'Text & HTML to PDF Studio')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Studio</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-
-                    <!-- Tool Card: SVG to PNG -->
-                    <div class="tool-card glass-card rounded-2xl p-6 flex flex-col justify-between" data-title="svg to png image rasterizer converter">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-2.5 py-1 text-xs font-semibold bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 rounded-lg">Vector Tool</span>
-                                <i class="fas fa-vector-square text-2xl text-orange-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">SVG to PNG Converter</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Convert vector SVG files into high-resolution PNG raster images with custom dimensions.</p>
-                        </div>
-                        <button onclick="openConverter('svg-to-png', 'SVG to PNG Converter')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center space-x-2">
-                            <span>Open Converter</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-    </main>
-
-    <!-- DEDICATED CONVERTER TOOL INTERACTIVE VIEW (Hidden by default, shown when a tool is opened) -->
-    <div id="converter-view" class="hidden flex-grow max-w-5xl mx-auto px-4 py-8 w-full">
-        <button onclick="showHomeView()" class="mb-6 inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-            <i class="fas fa-arrow-left"></i>
-            <span>Back to All Converters</span>
-        </button>
-
-        <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/80 dark:border-slate-800">
-            <!-- Tool Header -->
-            <div class="flex items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 mb-8">
-                <div>
-                    <h2 id="tool-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Media Converter</h2>
-                    <p id="tool-desc" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Select your input file to process instantly client-side.</p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl">
-                    <i id="tool-icon" class="fas fa-sync-alt"></i>
-                </div>
-            </div>
-
-            <!-- Converter Input & Canvas Workspace -->
-            <div class="space-y-6">
-                <!-- Dropzone File Upload -->
-                <div id="dropzone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-indigo-300 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-900/50 hover:bg-indigo-50/30 dark:hover:bg-slate-900">
-                    <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)">
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center text-2xl mb-4">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <p class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">Click or drag & drop file here</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400" id="supported-formats">Supports MP3, WAV, PNG, JPG, WEBP, SVG and more</p>
-                </div>
-
-                <!-- File Info Card (Hidden initially) -->
-                <div id="file-info" class="hidden p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-between">
-                    <div class="flex items-center space-x-3 overflow-hidden">
-                        <i class="fas fa-file text-indigo-500 text-xl"></i>
-                        <div class="truncate">
-                            <p id="file-name" class="font-semibold text-sm truncate text-slate-800 dark:text-slate-200">file_name.png</p>
-                            <p id="file-size" class="text-xs text-slate-500">0 KB</p>
-                        </div>
-                    </div>
-                    <button onclick="clearSelectedFile()" class="text-slate-400 hover:text-red-500 p-2">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Conversion Options Controls -->
-                <div id="conversion-options" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800">
-                    <!-- Image Quality / Audio Bitrate Slider -->
-                    <div id="quality-control-container">
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2" id="quality-label">Quality / Compression: 90%</label>
-                        <input type="range" id="quality-range" min="10" max="100" value="90" class="w-full accent-indigo-600" oninput="updateQualityLabel(this.value)">
-                    </div>
-
-                    <!-- Target Extension Selection Override -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Target Output Format</label>
-                        <select id="target-format-select" class="w-full py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="png">PNG (.png)</option>
-                            <option value="jpeg">JPG / JPEG (.jpg)</option>
-                            <option value="webp">WEBP (.webp)</option>
-                            <option value="mp3">MP3 (.mp3)</option>
-                            <option value="wav">WAV (.wav)</option>
-                            <option value="ogg">OGG (.ogg)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Text Studio Area (For Text to PDF tool) -->
-                <div id="text-studio-container" class="hidden space-y-4">
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Type or Paste Your Document Content:</label>
-                    <textarea id="text-studio-input" rows="8" placeholder="Type your notes or document text here..." class="w-full p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"></textarea>
-                </div>
-
-                <!-- Action Button -->
-                <button id="convert-btn" onclick="processConversion()" disabled class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center space-x-2">
-                    <i class="fas fa-cog text-sm" id="btn-spinner"></i>
-                    <span id="btn-text">Start Conversion</span>
-                </button>
-
-                <!-- Processing Progress Bar -->
-                <div id="progress-container" class="hidden space-y-2">
-                    <div class="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-400">
-                        <span>Processing File...</span>
-                        <span id="progress-percent">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                        <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-200" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- Result Preview & Download Area -->
-                <div id="result-container" class="hidden p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-4">
-                    <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-xl">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">Conversion Ready!</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Your file has been processed locally on your browser.</p>
-                    </div>
-
-                    <!-- Hidden Canvas element used for rendering image outputs -->
-                    <canvas id="conversion-canvas" class="hidden"></canvas>
-
-                    <!-- Preview element -->
-                    <div id="preview-box" class="max-w-xs mx-auto overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"></div>
-
-                    <!-- Download Trigger Button -->
-                    <a id="download-link" href="#" download="converted-file" class="inline-flex items-center space-x-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md">
-                        <i class="fas fa-download"></i>
-                        <span>Download Converted File</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+    <div class="format-row" id="formatRow">
+      <div class="format-option active" data-format="mp4" onclick="selectFormat(this)">
+        <div class="fmt-label">MP4</div>
+        <div class="fmt-desc">Video • up to 1080p</div>
+      </div>
+      <div class="format-option" data-format="mp3" onclick="selectFormat(this)">
+        <div class="fmt-label">MP3</div>
+        <div class="fmt-desc">Audio only • 192kbps</div>
+      </div>
     </div>
 
-    <!-- Footer with Policies and GitHub Links -->
-    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                        E
-                    </div>
-                    <span class="text-lg font-bold text-slate-900 dark:text-white">Ebice</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">© 2026 Ebice. All rights reserved.</span>
-                </div>
+    <div id="status"></div>
+  </div>
 
-                <div class="flex flex-wrap justify-center gap-6 text-sm text-slate-600 dark:text-slate-400">
-                    <button onclick="openModal('privacy-modal')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</button>
-                    <button onclick="openModal('terms-modal')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Service</button>
-                    <button onclick="openModal('cookie-modal')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Cookie Policy</button>
-                    <button onclick="openModal('setup-modal')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">GitHub & Cloudflare Setup</button>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- COOKIE CONSENT BANNER (Shows only once until Accepted/Rejected) -->
-    <div id="cookie-banner" class="hidden fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-50 p-6 glass-card rounded-2xl shadow-2xl border border-indigo-500/20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
-        <div class="flex items-start space-x-4">
-            <div class="p-3 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                <i class="fas fa-cookie-bite text-2xl"></i>
-            </div>
-            <div class="flex-1">
-                <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1">Cookie Preferences</h4>
-                <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                    We use cookies and Google AdSense to personalize content and analyze user traffic. Choose whether you consent to cookies.
-                </p>
-                <div class="flex items-center space-x-3">
-                    <button onclick="setCookieConsent('accepted')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition-all">
-                        Accept All
-                    </button>
-                    <button onclick="setCookieConsent('rejected')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-all">
-                        Reject
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALS SECTION -->
-    
-    <!-- Modal: Setup Guide for GitHub Pages + Cloudflare -->
-    <div id="setup-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-6">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                    <i class="fa-brands fa-github text-indigo-500"></i>
-                    <span>GitHub Pages + Cloudflare Setup</span>
-                </h3>
-                <button onclick="closeModal('setup-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
-                <p class="font-medium text-slate-800 dark:text-slate-100">Step-by-step tutorial to link your Ebice website code with GitHub Pages and Cloudflare Custom Domain:</p>
-
-                <ol class="list-decimal pl-5 space-y-3">
-                    <li>
-                        <strong>Upload file to GitHub:</strong>
-                        <p class="text-xs text-slate-500">Rename this file to <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-500">index.html</code>, upload it to your GitHub repository root folder, and commit.</p>
-                    </li>
-                    <li>
-                        <strong>Enable GitHub Pages:</strong>
-                        <p class="text-xs text-slate-500">Go to Repository <em>Settings &gt; Pages</em>. Select <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-500">main</code> branch and click <strong>Save</strong>.</p>
-                    </li>
-                    <li>
-                        <strong>Set Custom Domain in GitHub:</strong>
-                        <p class="text-xs text-slate-500">In GitHub Pages settings, under "Custom domain", enter your domain name (e.g. <code class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-500">ebice.com</code>) and save. This generates a CNAME file automatically.</p>
-                    </li>
-                    <li>
-                        <strong>Configure Cloudflare DNS:</strong>
-                        <p class="text-xs text-slate-500">In Cloudflare dashboard, go to <em>DNS &gt; Records</em> and add:</p>
-                        <ul class="list-disc pl-5 mt-1 text-xs text-slate-500 space-y-1">
-                            <li><strong>CNAME</strong> for <code class="text-indigo-400">@</code> pointing to <code class="text-indigo-400">yourusername.github.io</code> (Proxy enabled - Orange Cloud).</li>
-                            <li><strong>CNAME</strong> for <code class="text-indigo-400">www</code> pointing to <code class="text-indigo-400">yourusername.github.io</code>.</li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>SSL/TLS Settings on Cloudflare:</strong>
-                        <p class="text-xs text-slate-500">Set SSL/TLS encryption mode to <strong>Full</strong> or <strong>Flexible</strong> in Cloudflare to avoid redirection loop errors.</p>
-                    </li>
-                </ol>
-            </div>
-            <div class="mt-8 text-right">
-                <button onclick="closeModal('setup-modal')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm">Got it!</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Privacy Policy -->
-    <div id="privacy-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-6">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Privacy Policy</h3>
-                <button onclick="closeModal('privacy-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p>At <strong>Ebice</strong>, we prioritize your privacy. Unlike traditional file conversion services, processing occurs directly on your client web browser using JavaScript, HTML5 Canvas, and Web Audio APIs.</p>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200">1. No Server File Uploads</h4>
-                <p>Your uploaded media files are processed locally. They are never transmitted, stored, or viewed on external servers.</p>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200">2. Cookies & Advertising</h4>
-                <p>We use Google AdSense to serve ads. Google may use cookies to serve personalized ads based on user visits. You can accept or decline cookie preferences via our consent banner.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Terms of Service -->
-    <div id="terms-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-6">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Terms of Service</h3>
-                <button onclick="closeModal('terms-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p>By using <strong>Ebice</strong>, you agree to these terms. All conversion utilities are provided "as is" without warranty of any kind.</p>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200">Usage Restrictions</h4>
-                <p>You agree not to use Ebice to process unlawful content or infringe upon intellectual property rights.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Cookie Policy -->
-    <div id="cookie-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-6">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Cookie Policy</h3>
-                <button onclick="closeModal('cookie-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p>Cookies are small text files stored in your browser. Ebice uses local storage to remember your dark mode and cookie preferences, alongside standard Google AdSense cookies.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+  <!-- AdSense Ad Slot -->
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-7924204418079811"
+         data-ad-slot="auto"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
     <script>
-        // State variables
-        let currentTool = null;
-        let selectedFile = null;
-
-        // Theme Toggle Logic
-        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-        const themeToggleBtn = document.getElementById('theme-toggle');
-
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            themeToggleLightIcon.classList.remove('hidden');
-        } else {
-            document.documentElement.classList.remove('dark');
-            themeToggleDarkIcon.classList.remove('hidden');
-        }
-
-        themeToggleBtn.addEventListener('click', function() {
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
-            } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
-            }
-        });
-
-        // Cookie Consent Banner (Persists in localStorage so it only displays once)
-        window.addEventListener('load', () => {
-            const consent = localStorage.getItem('ebice_cookie_consent');
-            if (!consent) {
-                document.getElementById('cookie-banner').classList.remove('hidden');
-            }
-        });
-
-        function setCookieConsent(status) {
-            localStorage.setItem('ebice_cookie_consent', status);
-            document.getElementById('cookie-banner').classList.add('hidden');
-        }
-
-        // Search Tool Filter
-        function filterTools() {
-            const query = document.getElementById('tool-search').value.toLowerCase();
-            const cards = document.querySelectorAll('.tool-card');
-            cards.forEach(card => {
-                const title = card.getAttribute('data-title') || '';
-                if (title.toLowerCase().includes(query)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        // View Switchers (Home vs Converter View)
-        function showHomeView() {
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('converter-view').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openConverter(toolType, titleName) {
-            currentTool = toolType;
-            document.getElementById('main-content').classList.add('hidden');
-            document.getElementById('converter-view').classList.remove('hidden');
-            document.getElementById('tool-title').innerText = titleName;
-            
-            // Customize Converter UI depending on selected tool
-            const targetSelect = document.getElementById('target-format-select');
-            const qualityContainer = document.getElementById('quality-control-container');
-            const textStudio = document.getElementById('text-studio-container');
-            const dropzone = document.getElementById('dropzone');
-
-            qualityContainer.classList.remove('hidden');
-            textStudio.classList.add('hidden');
-            dropzone.classList.remove('hidden');
-
-            if (toolType.startsWith('image-') || toolType === 'svg-to-png') {
-                document.getElementById('tool-icon').className = 'fas fa-image';
-                document.getElementById('supported-formats').innerText = 'Supports PNG, JPG, WEBP, GIF, SVG';
-                if (toolType === 'image-to-png') targetSelect.value = 'png';
-                if (toolType === 'image-to-jpg') targetSelect.value = 'jpeg';
-                if (toolType === 'image-to-webp') targetSelect.value = 'webp';
-            } else if (toolType.startsWith('audio-')) {
-                document.getElementById('tool-icon').className = 'fas fa-music';
-                document.getElementById('supported-formats').innerText = 'Supports MP3, WAV, OGG, M4A, MP4 Audio';
-                if (toolType === 'audio-to-mp3') targetSelect.value = 'mp3';
-                if (toolType === 'audio-to-wav') targetSelect.value = 'wav';
-                if (toolType === 'audio-to-ogg') targetSelect.value = 'ogg';
-            } else if (toolType === 'text-to-pdf') {
-                document.getElementById('tool-icon').className = 'fas fa-file-pdf';
-                textStudio.classList.remove('hidden');
-                dropzone.classList.add('hidden');
-                qualityContainer.classList.add('hidden');
-                document.getElementById('convert-btn').disabled = false;
-            }
-
-            clearSelectedFile();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // File Selection Handling
-        function handleFileSelect(event) {
-            const files = event.target.files;
-            if (files && files[0]) {
-                selectedFile = files[0];
-                document.getElementById('file-name').innerText = selectedFile.name;
-                document.getElementById('file-size').innerText = (selectedFile.size / 1024).toFixed(1) + ' KB';
-                document.getElementById('file-info').classList.remove('hidden');
-                document.getElementById('conversion-options').classList.remove('hidden');
-                document.getElementById('convert-btn').disabled = false;
-            }
-        }
-
-        function clearSelectedFile() {
-            selectedFile = null;
-            document.getElementById('file-input').value = '';
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('conversion-options').classList.add('hidden');
-            document.getElementById('result-container').classList.add('hidden');
-            document.getElementById('progress-container').classList.add('hidden');
-            if (currentTool !== 'text-to-pdf') {
-                document.getElementById('convert-btn').disabled = true;
-            }
-        }
-
-        function updateQualityLabel(val) {
-            document.getElementById('quality-label').innerText = `Quality / Compression: ${val}%`;
-        }
-
-        // Conversion Engine Simulation & Real Canvas Execution
-        function processConversion() {
-            const btn = document.getElementById('convert-btn');
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressPercent = document.getElementById('progress-percent');
-            const resultContainer = document.getElementById('result-container');
-
-            btn.disabled = true;
-            progressContainer.classList.remove('hidden');
-            resultContainer.classList.add('hidden');
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 15;
-                if (progress > 100) progress = 100;
-                progressBar.style.width = `${progress}%`;
-                progressPercent.innerText = `${progress}%`;
-
-                if (progress === 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        executeRealConversion();
-                        btn.disabled = false;
-                    }, 300);
-                }
-            }, 100);
-        }
-
-        function executeRealConversion() {
-            const targetFormat = document.getElementById('target-format-select').value;
-            const qualityVal = parseFloat(document.getElementById('quality-range').value) / 100;
-            const resultContainer = document.getElementById('result-container');
-            const downloadLink = document.getElementById('download-link');
-            const previewBox = document.getElementById('preview-box');
-
-            previewBox.innerHTML = '';
-
-            // 1. Text to Printable HTML / PDF Document
-            if (currentTool === 'text-to-pdf') {
-                const textContent = document.getElementById('text-studio-input').value || 'Sample Document Content';
-                const blob = new Blob([`<html><body style="font-family:sans-serif;padding:40px;"><h1>Document Export</h1><hr/><p>${textContent.replace(/\n/g, '<br>')}</p></body></html>`], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                downloadLink.href = url;
-                downloadLink.download = `ebice-document.html`;
-                downloadLink.querySelector('span').innerText = 'Download Printable Document';
-                resultContainer.classList.remove('hidden');
-                return;
-            }
-
-            if (!selectedFile) return;
-
-            // 2. Image Conversions using HTML5 Canvas & Blobs
-            if (selectedFile.type.startsWith('image/') || currentTool.startsWith('image-') || currentTool === 'svg-to-png') {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.getElementById('conversion-canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Fill white background for transparent to JPG conversion
-                        if (targetFormat === 'jpeg') {
-                            ctx.fillStyle = '#FFFFFF';
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        }
-                        
-                        ctx.drawImage(img, 0, 0);
-
-                        const mimeType = targetFormat === 'png' ? 'image/png' : (targetFormat === 'webp' ? 'image/webp' : 'image/jpeg');
-                        const dataUrl = canvas.toDataURL(mimeType, qualityVal);
-
-                        // Set Preview
-                        const previewImg = document.createElement('img');
-                        previewImg.src = dataUrl;
-                        previewImg.className = 'max-h-48 mx-auto object-contain py-2';
-                        previewBox.appendChild(previewImg);
-
-                        downloadLink.href = dataUrl;
-                        downloadLink.download = `ebice-converted.${targetFormat}`;
-                        downloadLink.querySelector('span').innerText = `Download .${targetFormat.toUpperCase()}`;
-                        resultContainer.classList.remove('hidden');
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(selectedFile);
-            } 
-            // 3. Audio Conversion Simulation / Audio Wave export Blob
-            else {
-                const blob = new Blob([selectedFile], { type: `audio/${targetFormat}` });
-                const url = URL.createObjectURL(blob);
-                
-                const audioElement = document.createElement('audio');
-                audioElement.controls = true;
-                audioElement.src = url;
-                audioElement.className = 'w-full my-2';
-                previewBox.appendChild(audioElement);
-
-                downloadLink.href = url;
-                downloadLink.download = `ebice-converted.${targetFormat}`;
-                downloadLink.querySelector('span').innerText = `Download .${targetFormat.toUpperCase()}`;
-                resultContainer.classList.remove('hidden');
-            }
-        }
-
-        // Modal Helpers
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+      (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 ebice.site. All rights reserved.</p>
+  <p>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="cookies.html">Cookie Policy</a>
+  </p>
+  <p style="margin-top:8px; font-size:0.72rem;">
+    ebice.site is not affiliated with YouTube or Google. Downloading content you do not own may violate YouTube's Terms of Service.
+  </p>
+</footer>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-banner">
+  <div class="cookie-inner">
+    <p>
+      We use cookies to personalize ads and analyze traffic. Read our
+      <a href="cookies.html">Cookie Policy</a> and <a href="privacy.html">Privacy Policy</a>.
+    </p>
+    <div class="cookie-actions">
+      <button class="btn-sm reject" onclick="cookieChoice('rejected')">Reject Non-Essential</button>
+      <button class="btn-sm accept" onclick="cookieChoice('accepted')">Accept All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Format Selection ----------
+  let selectedFormat = 'mp4';
+
+  function selectFormat(el) {
+    document.querySelectorAll('.format-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    selectedFormat = el.dataset.format;
+  }
+
+  // ---------- Download Handler ----------
+  // 注意：以下代码假设你有一个后端 API 运行在 /api/download
+  // 实际部署时，你需要把 API_BASE 换成你的服务器地址
+  const API_BASE = 'https://your-backend-server.com'; // ← 替换为你的后端地址
+
+  async function startDownload() {
+    const url = document.getElementById('urlInput').value.trim();
+    const status = document.getElementById('status');
+    const btn = document.getElementById('downloadBtn');
+
+    if (!url) {
+      showStatus('error', 'Please paste a YouTube URL first.');
+      return;
+    }
+
+    // Basic URL validation
+    if (!url.includes('youtube.com/watch') && !url.includes('youtu.be/')) {
+      showStatus('error', 'Please enter a valid YouTube URL.');
+      return;
+    }
+
+    btn.disabled = true;
+    showStatus('info', 'Processing your request... This may take a moment.');
+
+    try {
+      const res = await fetch(`${API_BASE}/download`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, format: selectedFormat })
+      });
+
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+
+      const data = await res.json();
+
+      if (data.status === 'completed' && data.download_url) {
+        showStatus('success',
+          `Done! <a href="${data.download_url}" target="_blank" rel="noopener">Click here to download your ${selectedFormat.toUpperCase()}</a>`
+        );
+      } else if (data.status === 'processing' && data.job_id) {
+        // Poll for completion (simple version)
+        pollJob(data.job_id);
+      } else {
+        throw new Error(data.message || 'Unknown response');
+      }
+    } catch (err) {
+      showStatus('error', 'Error: ' + err.message + '. Make sure the backend is running.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function pollJob(jobId) {
+    const status = document.getElementById('status');
+    let attempts = 0;
+    const maxAttempts = 60; // 60 * 3s = 3 min timeout
+
+    const timer = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(timer);
+        showStatus('error', 'Request timed out. Try again later.');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/status/${jobId}`);
+        const data = await res.json();
+        if (data.status === 'completed') {
+          clearInterval(timer);
+          showStatus('success',
+            `Done! <a href="${data.download_url}" target="_blank" rel="noopener">Click here to download</a>`
+          );
+        } else if (data.status === 'error') {
+          clearInterval(timer);
+          showStatus('error', 'Processing failed: ' + (data.message || 'unknown error'));
+        }
+      } catch (_) { /* keep polling */ }
+    }, 3000);
+  }
+
+  function showStatus(type, msg) {
+    const el = document.getElementById('status');
+    el.className = type;
+    el.innerHTML = msg;
+  }
+
+  // ---------- Cookie Consent ----------
+  // Google AdSense 要求：在获得同意之前，不应加载个性化广告 Cookie
+  // 这里用 localStorage 记录选择；GDPR 严格合规需要 Consent Mode v2，
+  // 但基础实现中我们至少做到“用户选择后才认为可投放个性化广告”
+  function cookieChoice(choice) {
+    localStorage.setItem('cookie_consent', choice);
+    document.getElementById('cookie-banner').classList.remove('show');
+
+    if (choice === 'accepted') {
+      // 如果使用 Consent Mode v2，这里应调用 gtag('consent', 'update', ...)
+      // 对于纯 AdSense 静态站，基础的 AdSense 脚本已在 head 中加载，
+      // 但 Google 会根据用户区域决定是否投放个性化广告
+      console.log('Cookies accepted — personalized ads may be served.');
+    } else {
+      console.log('Cookies rejected — non-personalized ads only (where applicable).');
+    }
+  }
+
+  // Show banner if no prior choice
+  (function initCookieBanner() {
+    if (!localStorage.getItem('cookie_consent')) {
+      document.getElementById('cookie-banner').classList.add('show');
+    }
+  })();
+</script>
+
 </body>
 </html>
