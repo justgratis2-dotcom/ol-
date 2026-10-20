@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ebice - Descargador de Videos</title>
+  
+  <!-- Favicon configurado para archivo PNG -->
+  <link rel="icon" href="favicon.png" type="image/png">
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811" crossorigin="anonymous"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -143,7 +150,6 @@
       resultado.innerHTML = '<div class="loader"></div><p style="text-align:center;color:#aaa">Procesando video...</p>';
 
       try {
-        // Usando API pública (puede dejar de funcionar, ver notas abajo)
         const respuesta = await fetch(`https://api.cobalt.tools/api/json`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
