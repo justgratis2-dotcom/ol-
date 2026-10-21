@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ebice v4.0 Ultimate | Web Utilities, Media Lab & Gamified Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- gifshot for GIF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 dark:text-slate-100 light:text-slate-900 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+
+    <!-- TOP HEADER / NAV -->
+    <header class="sticky top-0 z-40 bg-slate-900/80 dark:bg-slate-900/80 light:bg-white/80 backdrop-blur-md border-b border-slate-800 dark:border-slate-800 light:border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-1.5 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center">
+                    <svg class="w-8 h-8" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M220 100 H240 V200 C300 200 340 240 340 300 C340 360 290 410 220 410 C180 410 140 380 130 350 H170 C180 365 200 375 220 375 C260 375 300 345 300 300 C300 255 260 235 220 235 H220 V100 Z" fill="#0066cc"/>
+                        <circle cx="210" cy="290" r="60" stroke="#0066cc" stroke-width="32" fill="none"/>
+                        <line x1="150" y1="290" x2="270" y2="290" stroke="#0066cc" stroke-width="28"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-blue-500 to-indigo-300 bg-clip-text text-transparent">Ebice v4.0 Ultimate</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">All-in-One Utility, Media & Dev Suite</p>
+                </div>
+            </div>
+
+            <!-- Gamification, Theme Toggle & User Auth Status -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Streak Badge -->
+                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-xs font-semibold" title="Daily Streak">
+                    <i data-lucide="flame" class="w-4 h-4 fill-amber-400"></i>
+                    <span id="streak-counter">1 Day</span>
+                </div>
+
+                <!-- Level & XP -->
+                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 rounded-xl p-1.5 px-3">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[11px] font-bold text-brand-400 uppercase tracking-wider">Lvl <span id="user-level">1</span></span>
+                        <div class="w-16 sm:w-20 bg-slate-700 h-1.5 rounded-full overflow-hidden mt-0.5">
+                            <div id="xp-progress" class="bg-gradient-to-r from-brand-500 to-indigo-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                    <span id="user-xp" class="text-xs font-semibold text-slate-300">0 XP</span>
+                </div>
+
+                <!-- User Account / Actions -->
+                <div id="auth-actions" class="flex items-center gap-2">
+                    <!-- Guest Controls -->
+                    <div id="guest-btn-group" class="flex items-center gap-2">
+                        <button onclick="openAuthModal('login')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">
+                            Sign In
+                        </button>
+                        <button onclick="openAuthModal('register')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-brand-600/20">
+                            Create Account
+                        </button>
+                    </div>
+
+                    <!-- Logged User Dropdown / Profile Badge -->
+                    <div id="user-badge-group" class="hidden relative">
+                        <button onclick="toggleUserDropdown()" class="flex items-center gap-2 bg-brand-900/40 border border-brand-500/30 hover:border-brand-500/60 p-1.5 px-3 rounded-xl transition">
+                            <div class="w-6 h-6 rounded-lg bg-brand-600 text-white flex items-center justify-center text-xs font-bold" id="user-avatar">
+                                U
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span id="display-username" class="text-xs font-bold text-slate-100 leading-none">Username</span>
+                                <span id="display-userid" class="text-[10px] font-mono text-brand-300 leading-none mt-1">#EBC-000000</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50">
+                            <button onclick="openSettingsModal()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition">
+                                <i data-lucide="settings" class="w-4 h-4 text-brand-400"></i> Profile Settings
+                            </button>
+                            <div class="my-1 border-t border-slate-800"></div>
+                            <button onclick="logoutUser()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/40 flex items-center gap-2 transition">
+                                <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AUTHENTICATION REQUIRED MODAL OVERLAY -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-md w-full border border-slate-800 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-brand-600/20 text-brand-400 border border-brand-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h2 id="auth-modal-title" class="text-xl font-bold text-slate-100">Sign In to Ebice</h2>
+                <p id="auth-modal-sub" class="text-xs text-slate-400 mt-1">Please log in or register with a Username and Password to use this service.</p>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+                        <input type="text" id="auth-username" required placeholder="Enter username" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="key" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+                        <input type="password" id="auth-password" required placeholder="Enter password" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div id="auth-error" class="hidden text-xs text-rose-400 bg-rose-950/50 border border-rose-800/50 p-2.5 rounded-lg text-center"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-lg shadow-brand-600/25 flex items-center justify-center gap-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> <span id="auth-submit-label">Sign In</span>
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-800 text-center flex items-center justify-between text-xs text-slate-400">
+                <span id="auth-toggle-msg">Don't have an account?</span>
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-brand-400 font-semibold hover:underline">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-md w-full border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-3 bg-brand-600/20 text-brand-400 rounded-2xl border border-brand-500/30">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-100">Profile & Studio Settings</h2>
+                    <p class="text-xs text-slate-400">Manage profile, account details, and custom UI appearance.</p>
+                </div>
+            </div>
+
+            <!-- User Info Card -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4 space-y-2 text-xs">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Creation User ID:</span>
+                    <span id="settings-userid" class="font-mono text-brand-400 font-bold">#EBC-000000</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Total XP Earned:</span>
+                    <span id="settings-xp" class="font-bold text-slate-200">0 XP</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Files Processed:</span>
+                    <span id="settings-files" class="font-bold text-emerald-400">0 Files</span>
+                </div>
+            </div>
+
+            <!-- Customization & Settings Form -->
+            <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
+                    <input type="text" id="settings-username" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">New Password (Optional)</label>
+                    <input type="password" id="settings-password" placeholder="Leave empty to keep current" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                </div>
+
+                <!-- APPEARANCE & CUSTOM COLOR SETTINGS -->
+                <div class="pt-3 border-t border-slate-800 space-y-3">
+                    <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Custom Appearance Options
+                    </h3>
+
+                    <!-- Custom Background Color Picker -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Custom Background Color</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="settings-bg-color" value="#020617" onchange="applyCustomBgColor(this.value)" class="w-10 h-10 bg-transparent border-0 rounded cursor-pointer">
+                            <div class="flex-1 flex gap-2">
+                                <button type="button" onclick="presetBgColor('#020617')" class="px-2.5 py-1 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Default Dark</button>
+                                <button type="button" onclick="presetBgColor('#0f172a')" class="px-2.5 py-1 text-[11px] bg-slate-900 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Slate Navy</button>
+                                <button type="button" onclick="presetBgColor('#18181b')" class="px-2.5 py-1 text-[11px] bg-zinc-900 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Charcoal</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Glass Panel Blur level -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-300 mb-1">
+                            <label class="font-semibold">Glassmorphism UI Blur intensity</label>
+                            <span id="settings-blur-val" class="text-brand-400 font-mono">12px</span>
+                        </div>
+                        <input type="range" id="settings-ui-blur" min="0" max="24" value="12" class="w-full accent-brand-500" oninput="updateUIBlur(this.value)">
+                    </div>
+
+                    <!-- Sound FX Toggle -->
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-xs font-semibold text-slate-300">Action Sound Effects & Audio Haptics</span>
+                        <input type="checkbox" id="settings-sound-toggle" checked class="accent-brand-500 w-4 h-4 rounded cursor-pointer">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20 mt-4">
+                    <i data-lucide="save" class="w-4 h-4"></i> Save All Settings
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full flex flex-col gap-6">
+
+        <!-- ADSENSE AD SPACE (TOP) -->
+        <div class="w-full bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center min-h-[80px] text-xs text-slate-500">
+            <span>Advertisement Space</span>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 custom-scrollbar">
+            <button onclick="switchTab('media-editor')" id="tab-media-editor" class="tab-btn active-tab flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm whitespace-nowrap transition">
+                <i data-lucide="scissors" class="w-4 h-4"></i> Audio/Video Studio & Extractor
+            </button>
+            <button onclick="switchTab('watermark-studio')" id="tab-watermark-studio" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="stamp" class="w-4 h-4"></i> Watermark Studio (Mark Water)
+            </button>
+            <button onclick="switchTab('roblox-obfuscator')" id="tab-roblox-obfuscator" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="shield-code" class="w-4 h-4"></i> Roblox Lua Obfuscator
+            </button>
+            <button onclick="switchTab('gif-creator')" id="tab-gif-creator" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="film" class="w-4 h-4"></i> Animated GIF Studio
+            </button>
+            <button onclick="switchTab('converter')" id="tab-converter" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="image" class="w-4 h-4"></i> Image Converter
+            </button>
+            <button onclick="switchTab('glitch-studio')" id="tab-glitch-studio" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="terminal" class="w-4 h-4"></i> Glitch & CRT FX
+            </button>
+            <button onclick="switchTab('pixel-art')" id="tab-pixel-art" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="palette" class="w-4 h-4"></i> Pixel Art Studio
+            </button>
+            <button onclick="switchTab('glassmorphism')" id="tab-glassmorphism" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="layout" class="w-4 h-4"></i> Glassmorphism UI
+            </button>
+            <button onclick="switchTab('audio-synth')" id="tab-audio-synth" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="music" class="w-4 h-4"></i> Tone Synthesizer
+            </button>
+            <button onclick="switchTab('dev-tools')" id="tab-dev-tools" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="code" class="w-4 h-4"></i> Dev & Text Utils
+            </button>
+            <button onclick="switchTab('unit-tools')" id="tab-unit-tools" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="hash" class="w-4 h-4"></i> Unit & Color Tools
+            </button>
+            <button onclick="switchTab('daily-roulette')" id="tab-daily-roulette" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
+                <i data-lucide="disc" class="w-4 h-4"></i> Daily Spin
+            </button>
+        </nav>
+
+        <!-- 1. TAB: AUDIO/VIDEO STUDIO & EXTRACTOR CONVERTER -->
+        <section id="content-media-editor" class="tab-content flex flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="scissors" class="w-5 h-5 text-brand-400"></i> MP3 / MP4 Media Trimmer, Pitch & Interactive Audio Extractor
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-1">Upload MP3, MP4, WAV, or WEBM. Click and drag directly on the waveform canvas to trim segments manually!</p>
+                    </div>
+                    <button onclick="useGatedService('load-media')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Load MP3 / MP4 / Audio / Video
+                        <input type="file" id="media-input" accept="audio/*,video/*" class="hidden" onchange="handleMediaLoad(this)">
+                    </button>
+                </div>
+
+                <!-- Media Placeholder -->
+                <div id="media-placeholder" class="border-2 border-dashed border-slate-800 rounded-2xl p-10 text-center flex flex-col items-center justify-center gap-3">
+                    <div class="p-4 bg-slate-800/50 rounded-full text-slate-400">
+                        <i data-lucide="file-video" class="w-10 h-10"></i>
+                    </div>
+                    <p class="text-slate-300 font-medium">No media file loaded yet.</p>
+                    <p class="text-xs text-slate-500 max-w-md">Drag & drop or select an audio or video file above. Click & drag on waveform to cut manually, adjust pitch, and extract media.</p>
+                </div>
+
+                <div id="media-editor" class="hidden flex flex-col gap-6">
+                    <!-- Media Preview Canvas & Video Area -->
+                    <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 flex flex-col items-center justify-center relative">
+                        <video id="video-preview" class="hidden max-h-64 rounded-lg w-full object-contain mb-3" controls></video>
+                        <audio id="audio-preview" class="hidden w-full mb-3" controls></audio>
+                        
+                        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-2">
+                            <span class="flex items-center gap-1.5 font-medium"><i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-brand-400"></i> Interactive Trim Timeline: Click or Drag on Waveform to Set Start / End Cut</span>
+                            <span class="font-mono text-brand-400" id="waveform-cursor-time">0.00s</span>
+                        </div>
+                        <canvas id="waveform-canvas" class="w-full h-28 bg-slate-900 rounded-lg border border-slate-800 cursor-crosshair transition-all"></canvas>
+                    </div>
+
+                    <!-- Trimmer Controls -->
+                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 flex flex-col gap-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold">
+                            <span>TRIM START: <span id="trim-start-val" class="text-brand-400 font-mono">0.00s</span></span>
+                            <span>CLIP LENGTH: <span id="trim-duration-val" class="text-slate-200 font-mono">0.00s</span></span>
+                            <span>TRIM END: <span id="trim-end-val" class="text-brand-400 font-mono">0.00s</span></span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-slate-400 mb-1 block">Start Cut Time (Seconds)</label>
+                                <input type="range" id="trim-start" min="0" max="100" value="0" step="0.1" class="w-full accent-brand-500">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 mb-1 block">End Cut Time (Seconds)</label>
+                                <input type="range" id="trim-end" min="0" max="100" value="100" step="0.1" class="w-full accent-brand-500">
+                            </div>
+                        </div>
+                    </div>
+        <!-- WATERMARK STUDIO (MARK WATER) -->
+        <section id="content-watermark-studio" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="stamp" class="w-5 h-5 text-brand-400"></i> Mark Water Studio - Image Watermarking Tool
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-1">Add custom text or image overlay watermarks to your pictures, adjust opacity, position, scale, and download.</p>
+                    </div>
+                    <button onclick="useGatedService('load-watermark-base')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Main Image
+                        <input type="file" id="wm-base-input" accept="image/*" class="hidden" onchange="handleWatermarkBaseLoad(this)">
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Controls Column -->
+                    <div class="lg:col-span-1 bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider">Watermark Options</h3>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Watermark Type</label>
+                            <select id="wm-type" onchange="toggleWmType()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                                <option value="text">Text Watermark</option>
+                                <option value="image">Image Logo Overlay</option>
+                            </select>
+                        </div>
+
+                        <!-- Text WM Options -->
+                        <div id="wm-text-options" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Watermark Text</label>
+                                <input type="text" id="wm-text" value="CONFIDENTIAL / EBICE WATERMARK" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200" oninput="renderWatermarkCanvas()">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Font Color</label>
+                                    <input type="color" id="wm-text-color" value="#ffffff" class="w-full h-8 bg-transparent cursor-pointer rounded" onchange="renderWatermarkCanvas()">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Font Size</label>
+                                    <input type="number" id="wm-text-size" value="28" min="10" max="120" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200" oninput="renderWatermarkCanvas()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Logo Overlay Options -->
+                        <div id="wm-image-options" class="hidden space-y-3">
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Upload Logo Image</label>
+                            <button onclick="document.getElementById('wm-logo-input').click()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs py-2 rounded-xl border border-slate-800 transition flex items-center justify-center gap-2">
+                                <i data-lucide="image" class="w-3.5 h-3.5"></i> Select Logo File
+                            </button>
+                            <input type="file" id="wm-logo-input" accept="image/*" class="hidden" onchange="handleWatermarkLogoLoad(this)">
+                        </div>
+
+                        <!-- Common Position & Opacity Controls -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Position Preset</label>
+                            <select id="wm-position" onchange="renderWatermarkCanvas()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+                                <option value="center">Center</option>
+                                <option value="bottom-right" selected>Bottom Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                                <option value="top-right">Top Right</option>
+                                <option value="top-left">Top Left</option>
+                                <option value="tiled">Tiled Diagonal Pattern</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-300 mb-1">
+                                <label class="font-semibold">Opacity</label>
+                                <span id="wm-opacity-val" class="text-brand-400 font-mono">50%</span>
+                            </div>
+                            <input type="range" id="wm-opacity" min="5" max="100" value="50" class="w-full accent-brand-500" oninput="document.getElementById('wm-opacity-val').textContent = this.value + '%'; renderWatermarkCanvas();">
+                        </div>
+
+                        <button onclick="useGatedService('download-watermark')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                            <i data-lucide="download" class="w-4 h-4"></i> Export Watermarked Image (+15 XP)
+                        </button>
+                    </div>
+
+                    <!-- Canvas Preview Column -->
+                    <div class="lg:col-span-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col items-center justify-center min-h-[300px]">
+                        <canvas id="watermark-canvas" class="max-w-full max-h-[450px] rounded-xl border border-slate-800 shadow-xl"></canvas>
+                        <p id="wm-placeholder" class="text-xs text-slate-500 mt-2">Upload a main image to preview watermark overlay.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TAB: ROBLOX LUA CODE OBFUSCATOR -->
+        <section id="content-roblox-obfuscator" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="shield-code" class="w-5 h-5 text-brand-400"></i> Roblox Lua Code Obfuscator
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Bytearray virtualization, XOR string escaping, dead junk code injection, and code minification for Roblox Lua scripts.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold text-slate-300">Raw Lua Script</label>
+                            <button onclick="document.getElementById('lua-input').value=''" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
+                        </div>
+                        <textarea id="lua-input" rows="12" placeholder="-- Paste your Roblox Lua script here...&#10;print('Hello Ebice World!')" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500 custom-scrollbar"></textarea>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold text-brand-400">Obfuscated Output</label>
+                            <button onclick="copyToClipboard('lua-output')" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
+                                <i data-lucide="copy" class="w-3 h-3"></i> Copy Output
+                            </button>
+                        </div>
+                        <textarea id="lua-output" rows="12" readonly placeholder="Obfuscated code will appear here..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 focus:outline-none custom-scrollbar"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-800">
+                    <div class="flex items-center gap-4 text-xs text-slate-400">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="obf-junk" checked class="rounded accent-brand-500"> Inject Junk Loops
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="obf-xor" checked class="rounded accent-brand-500"> Byte Escaping
+                        </label>
+                    </div>
+
+                    <button onclick="useGatedService('obfuscate-lua')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center gap-2 text-sm">
+                        <i data-lucide="lock" class="w-4 h-4"></i> Obfuscate Roblox Script (+20 XP)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TAB: ANIMATED GIF CREATOR -->
+        <section id="content-gif-creator" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="film" class="w-5 h-5 text-brand-400"></i> Animated GIF Creator & Downloader
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Create animated spinning, pulsing, or flipping GIF loops from images or text logos.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Banner / Logo Text</label>
+                            <input type="text" id="gif-text-input" value="EBICE STUDIO" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Animation Style</label>
+                            <select id="gif-anim-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200">
+                                <option value="spin">360° Rotation Spin</option>
+                                <option value="pulse">Breathing Pulse Zoom</option>
+                                <option value="flip">Horizontal 3D Flip</option>
+                            </select>
+                        </div>
+
+                        <button onclick="useGatedService('generate-gif')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                            <i data-lucide="play" class="w-4 h-4"></i> Render Animated GIF (+20 XP)
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center min-h-[220px]">
+                        <img id="gif-preview-result" class="hidden max-h-48 rounded-lg shadow-lg" alt="Generated GIF">
+                        <div id="gif-placeholder-text" class="text-xs text-slate-500 text-center">
+                            Click "Render Animated GIF" to compile frames and view animation here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TAB: MULTI-FORMAT IMAGE CONVERTER -->
+        <section id="content-converter" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 text-center">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2 justify-center">
+                    <i data-lucide="image" class="w-5 h-5 text-brand-400"></i> Multi-Format Image Converter
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Convert PNG, JPG, WebP, GIF, and SVG formats instantly inside your browser without uploading to any server.</p>
+
+                <div class="max-w-xl mx-auto flex flex-col gap-4">
+                    <input type="file" id="img-convert-input" accept="image/*" class="hidden" onchange="previewImageToConvert(this)">
+                    <button onclick="useGatedService('select-convert-img')" class="cursor-pointer border-2 border-dashed border-slate-800 hover:border-brand-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 transition w-full">
+                        <i data-lucide="upload-cloud" class="w-10 h-10 text-brand-400"></i>
+                        <span class="text-sm font-medium text-slate-300">Click to Select Image File</span>
+                    </button>
+
+                    <div id="convert-options" class="hidden flex flex-col gap-4 pt-4 border-t border-slate-800">
+                        <div class="flex items-center justify-center gap-3">
+                            <label class="text-xs text-slate-300">Target Output Format:</label>
+                            <select id="target-img-format" class="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg px-3 py-2">
+                                <option value="image/png">PNG Format</option>
+                                <option value="image/jpeg">JPEG Format</option>
+                                <option value="image/webp">WEBP Format</option>
+                            </select>
+                        </div>
+                        <button onclick="useGatedService('execute-convert-img')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Convert & Download Image (+15 XP)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TAB: GLITCH & RETRO CRT FX -->
+        <section id="content-glitch-studio" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="terminal" class="w-5 h-5 text-brand-400"></i> Glitch & Retro CRT FX Studio
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Apply digital displacement slices, RGB chromatic abberation, and scanlines to text or canvas drawings.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Cyber Text Title</label>
+                            <input type="text" id="glitch-text-input" value="SYSTEM OVERRIDE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200" oninput="renderGlitchCanvas()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Glitch Slice Intensity</label>
+                            <input type="range" id="glitch-intensity" min="1" max="20" value="8" class="w-full accent-brand-500" oninput="renderGlitchCanvas()">
+                        </div>
+                        <button onclick="useGatedService('download-glitch')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Download Cyber Art (+15 XP)
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 p-4 flex items-center justify-center min-h-[200px]">
+                        <canvas id="glitch-canvas" width="400" height="200" class="max-w-full rounded-lg"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. TAB: PIXEL ART STUDIO -->
+        <section id="content-pixel-art" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="palette" class="w-5 h-5 text-brand-400"></i> Pixel Art Studio & Grid
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Draw 16x16 retro sprite artwork. Canvas changes auto-save automatically to your account!</p>
+
+                <div class="flex flex-col md:flex-row gap-6 items-center justify-center">
+                    <canvas id="pixel-canvas" width="256" height="256" class="bg-slate-950 border-2 border-slate-700 rounded-xl cursor-crosshair shadow-2xl"></canvas>
+                    <div class="flex flex-col gap-3 w-full md:w-auto">
+                        <label class="text-xs font-semibold text-slate-300">Pen Color</label>
+                        <input type="color" id="pixel-color" value="#6366f1" class="w-full h-10 bg-transparent rounded cursor-pointer">
+                        <button onclick="clearPixelCanvas()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-xl transition">Clear Canvas</button>
+                        <button onclick="useGatedService('export-pixel')" class="bg-brand-600 hover:bg-brand-500 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export PNG Artwork (+15 XP)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. TAB: GLASSMORPHISM UI BUILDER -->
+        <section id="content-glassmorphism" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="layout" class="w-5 h-5 text-brand-400"></i> Glassmorphism UI Builder
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Customize glass card opacity, backdrop blur, and border colors with real-time CSS generation.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Blur Radius (px)</label>
+                            <input type="range" id="glass-blur" min="0" max="30" value="12" class="w-full accent-brand-500" oninput="updateGlassPreview()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Background Opacity</label>
+                            <input type="range" id="glass-opacity" min="0" max="100" value="25" class="w-full accent-brand-500" oninput="updateGlassPreview()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-300 block mb-1">Border Opacity</label>
+                            <input type="range" id="glass-border" min="0" max="100" value="15" class="w-full accent-brand-500" oninput="updateGlassPreview()">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <div id="glass-demo-card" class="p-6 rounded-2xl border flex flex-col gap-2 min-h-[140px] justify-center">
+                            <h4 class="font-bold text-slate-100">Glassmorphism Card</h4>
+                            <p class="text-xs text-slate-300">Live preview card adjusting according to controls.</p>
+                        </div>
+                        <textarea id="glass-css-output" rows="3" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-400 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. TAB: TONE SYNTHESIZER -->
+        <section id="content-audio-synth" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 text-center">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2 justify-center">
+                    <i data-lucide="music" class="w-5 h-5 text-brand-400"></i> Audio & Tone Synthesizer
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Generate sine, square, sawtooth, or triangle sound frequencies in real-time.</p>
+
+                <div class="max-w-md mx-auto flex flex-col gap-4">
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span>Frequency: <span id="freq-val" class="text-brand-400 font-mono">440 Hz</span></span>
+                    </div>
+                    <input type="range" id="freq-slider" min="100" max="2000" value="440" class="w-full accent-brand-500" oninput="document.getElementById('freq-val').textContent = this.value + ' Hz'">
+                    
+                    <div class="flex justify-center gap-3">
+                        <button onclick="useGatedService('tone-sine')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Sine Tone</button>
+                        <button onclick="useGatedService('tone-square')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Square Wave</button>
+                        <button onclick="useGatedService('tone-sawtooth')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Sawtooth</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. TAB: DEV & TEXT UTILITIES -->
+        <section id="content-dev-tools" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="code" class="w-5 h-5 text-brand-400"></i> Dev & Text Utilities Studio
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Format JSON, Encode/Decode Base64, URL encode, or hash text string data instantly.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-300 block mb-1">Input Text / Raw JSON</label>
+                        <textarea id="dev-input" rows="8" placeholder="Enter text here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-brand-400 block mb-1">Formatted Output</label>
+                        <textarea id="dev-output" rows="8" readonly placeholder="Output will render here..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-400 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button onclick="useGatedService('format-json')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Format JSON</button>
+                    <button onclick="useGatedService('encode-b64')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Base64 Encode</button>
+                    <button onclick="useGatedService('decode-b64')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Base64 Decode</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. TAB: UNIT & COLOR TOOLS -->
+        <section id="content-unit-tools" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="hash" class="w-5 h-5 text-brand-400"></i> Unit & Color Converter Studio
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Convert Pixels to REM units and HEX colors to RGB and HSL triplets.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sm text-slate-200">PX to REM Converter</h4>
+                        <div class="flex items-center gap-3">
+                            <input type="number" id="px-val" value="16" class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded-lg" oninput="convertPxToRem()">
+                            <span class="text-xs text-slate-400">px =</span>
+                            <span id="rem-result" class="text-sm font-bold text-brand-400 font-mono">1.00rem</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sm text-slate-200">Color Converter (HEX to RGB)</h4>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="color-picker" value="#6366f1" class="w-10 h-10 rounded cursor-pointer bg-transparent" oninput="convertColor()">
+                            <span id="color-rgb-result" class="text-xs font-mono text-slate-300">rgb(99, 102, 241)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. TAB: DAILY SPIN -->
+        <section id="content-daily-roulette" class="tab-content hidden flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col items-center text-center">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <i data-lucide="disc" class="w-5 h-5 text-amber-400"></i> Daily Bonus Spin
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">Spin daily to unlock free bonus XP and increase your streak status!</p>
+
+                <div class="w-48 h-48 border-4 border-amber-500/40 rounded-full flex items-center justify-center bg-slate-950 text-amber-400 font-extrabold text-2xl shadow-2xl relative mb-6">
+                    <span id="roulette-wheel">SPIN</span>
+                </div>
+                <button id="btn-spin" onclick="useGatedService('spin-roulette')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-8 py-3 rounded-xl shadow-lg transition">Spin Wheel!</button>
+            </div>
+        </section>
+
+        <!-- ADSENSE AD SPACE (BOTTOM) -->
+        <div class="w-full bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center min-h-[80px] text-xs text-slate-500 mt-auto">
+            <span>Advertisement Space</span>
+        </div>
+
+    </div>
+
+    <!-- FOOTER & LEGAL MODALS -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>&copy; 2026 Ebice v4.0 Ultimate. All rights reserved.</p>
+            <div class="flex gap-4">
+                <button onclick="showLegal('privacy')" class="hover:text-slate-300 transition">Privacy Policy</button>
+                <button onclick="showLegal('terms')" class="hover:text-slate-300 transition">Terms of Service</button>
+                <button onclick="showLegal('cookies')" class="hover:text-slate-300 transition">Cookie Policy</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LEGAL MODAL -->
+    <div id="legal-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 max-w-3xl w-full relative max-h-[85vh] flex flex-col shadow-2xl">
+            <button onclick="closeLegal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 id="legal-title" class="text-xl font-bold text-slate-100 mb-4 pb-3 border-b border-slate-800 flex items-center gap-2"></h3>
+            <div id="legal-body" class="text-xs text-slate-300 leading-relaxed overflow-y-auto custom-scrollbar pr-2 space-y-4 flex-1"></div>
+        </div>
+    </div>
+
+    <!-- MAIN ENGINE SCRIPT -->
+    <script>
+        let appState = {
+            currentUser: null,
+            xp: 0,
+            level: 1,
+            streak: 1,
+            filesProcessed: 0,
+            theme: 'dark',
+            customBg: '#020617',
+            uiBlur: '12px',
+            soundEnabled: true,
+            lastLoginDate: new Date().toDateString()
+        };
+
+        // Audio Context & Waveform state variables
+        let audioCtx = null;
+        let audioBuffer = null;
+        let mediaFile = null;
+
+        function loadAppState() {
+            const savedState = localStorage.getItem('ebice_v4_appstate');
+            if (savedState) {
+                try {
+                    appState = { ...appState, ...JSON.parse(savedState) };
+                } catch(e) {
+                    console.error("Failed to load state", e);
+                }
+            }
+
+            // Check Streak
+            const today = new Date().toDateString();
+            if (appState.lastLoginDate !== today) {
+                const last = new Date(appState.lastLoginDate);
+                const diffTime = Math.abs(new Date() - last);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 2) {
+                    appState.streak += 1;
+                } else {
+                    appState.streak = 1;
+                }
+                appState.lastLoginDate = today;
+                saveAppState();
+            }
+
+            applyCustomBgColor(appState.customBg || '#020617');
+            updateUIBlur(parseInt(appState.uiBlur) || 12);
+            updateUserUI();
+        }
+
+        function saveAppState() {
+            localStorage.setItem('ebice_v4_appstate', JSON.stringify(appState));
+            updateUserUI();
+        }
+
+        function updateUserUI() {
+            document.getElementById('user-level').textContent = appState.level;
+            document.getElementById('user-xp').textContent = appState.xp + ' XP';
+            document.getElementById('streak-counter').textContent = appState.streak + ' Days';
+            
+            const xpForNextLevel = appState.level * 100;
+            const currentLevelXP = appState.xp % 100;
+            const percentage = Math.min(100, Math.floor((currentLevelXP / 100) * 100));
+            document.getElementById('xp-progress').style.width = percentage + '%';
+
+            if (appState.currentUser) {
+                document.getElementById('guest-btn-group').classList.add('hidden');
+                document.getElementById('user-badge-group').classList.remove('hidden');
+                document.getElementById('display-username').textContent = appState.currentUser.username;
+                document.getElementById('display-userid').textContent = appState.currentUser.id;
+                document.getElementById('user-avatar').textContent = appState.currentUser.username.charAt(0).toUpperCase();
+
+                document.getElementById('settings-username').value = appState.currentUser.username;
+                document.getElementById('settings-userid').textContent = appState.currentUser.id;
+                document.getElementById('settings-xp').textContent = appState.xp + ' XP';
+                document.getElementById('settings-files').textContent = appState.filesProcessed + ' Files';
+            } else {
+                document.getElementById('guest-btn-group').classList.remove('hidden');
+                document.getElementById('user-badge-group').classList.add('hidden');
+            }
+        }
+
+        function addXP(amount) {
+            appState.xp += amount;
+            appState.filesProcessed += 1;
+            const newLevel = Math.floor(appState.xp / 100) + 1;
+            if (newLevel > appState.level) {
+                appState.level = newLevel;
+            }
+            saveAppState();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active-tab', 'bg-brand-600', 'text-white');
+                el.classList.add('text-slate-400');
+            });
+
+            const targetContent = document.getElementById('content-' + tabId);
+            const targetTab = document.getElementById('tab-' + tabId);
+
+            if (targetContent) targetContent.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.add('active-tab', 'bg-brand-600', 'text-white');
+                targetTab.classList.remove('text-slate-400');
+            }
+        }
+
+        // AUTH & SETTINGS MODALS
+        let authMode = 'login';
+
+        function openAuthModal(mode) {
+            authMode = mode || 'login';
+            document.getElementById('auth-modal-title').textContent = authMode === 'login' ? 'Sign In to Ebice' : 'Create an Account';
+            document.getElementById('auth-submit-label').textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+            document.getElementById('auth-toggle-msg').textContent = authMode === 'login' ? "Don't have an account?" : "Already have an account?";
+            document.getElementById('auth-toggle-btn').textContent = authMode === 'login' ? 'Create Account' : 'Sign In';
+            document.getElementById('auth-error').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            openAuthModal(authMode === 'login' ? 'register' : 'login');
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+
+            if (!username || !password) {
+                showAuthError("Please fill in both fields.");
+                return;
+            }
+
+            const userId = '#EBC-' + Math.floor(100000 + Math.random() * 900000);
+            appState.currentUser = { username: username, id: userId };
+            saveAppState();
+            closeAuthModal();
+        }
+
+        function showAuthError(msg) {
+            const errEl = document.getElementById('auth-error');
+            errEl.textContent = msg;
+            errEl.classList.remove('hidden');
+        }
+
+        function toggleUserDropdown() {
+            const drop = document.getElementById('user-dropdown');
+            drop.classList.toggle('hidden');
+        }
+
+        function logoutUser() {
+            appState.currentUser = null;
+            document.getElementById('user-dropdown').classList.add('hidden');
+            saveAppState();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('user-dropdown').classList.add('hidden');
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function handleSaveSettings(e) {
+            e.preventDefault();
+            if (appState.currentUser) {
+                const newUsername = document.getElementById('settings-username').value.trim();
+                if (newUsername) {
+                    appState.currentUser.username = newUsername;
+                }
+            }
+            saveAppState();
+            closeSettingsModal();
+        }
+
+        function applyCustomBgColor(hexColor) {
+            appState.customBg = hexColor;
+            document.body.style.backgroundColor = hexColor;
+            document.getElementById('settings-bg-color').value = hexColor;
+        }
+
+        function presetBgColor(hexColor) {
+            applyCustomBgColor(hexColor);
+        }
+
+        function updateUIBlur(val) {
+            appState.uiBlur = val + 'px';
+            document.getElementById('settings-blur-val').textContent = val + 'px';
+            document.querySelectorAll('.glass-panel').forEach(el => {
+                el.style.backdropFilter = `blur(${val}px)`;
+            });
+        }
+
+        function showLegal(type) {
+            const modal = document.getElementById('legal-modal');
+            const title = document.getElementById('legal-title');
+            const body = document.getElementById('legal-body');
+
+            if (type === 'privacy') {
+                title.innerHTML = `<i data-lucide="shield" class="w-5 h-5 text-brand-400"></i> Privacy Policy`;
+                body.innerHTML = `
+                    <p><strong>Effective Date:</strong> October 2026</p>
+                    <p>Welcome to Ebice v4.0 Ultimate. Your privacy is paramount to us. All media processing, file conversions, and Lua obfuscations take place entirely inside your browser using client-side JavaScript execution.</p>
+                    <h4 class="font-bold text-slate-200 mt-2">1. Local Storage Data</h4>
+                    <p>We use standard LocalStorage to retain user preferences, XP progression, dark mode settings, and active session identifiers. No private user files are ever uploaded or transmitted to external servers.</p>
+                    <h4 class="font-bold text-slate-200 mt-2">2. Third-Party Services & Cookies</h4>
+                    <p>This web app integrates Google AdSense to serve ads. Google may use cookies to serve personalized ads based on previous visits to this or other websites.</p>
+                `;
+            } else if (type === 'terms') {
+                title.innerHTML = `<i data-lucide="file-text" class="w-5 h-5 text-brand-400"></i> Terms of Service`;
+                body.innerHTML = `
+                    <p><strong>Effective Date:</strong> October 2026</p>
+                    <p>By using Ebice v4.0 Ultimate, you agree to comply with the following terms:</p>
+                    <h4 class="font-bold text-slate-200 mt-2">1. Acceptable Use</h4>
+                    <p>You agree not to use the Roblox Lua Obfuscator or Media Tools to distribute malicious software or infringe copyright trademarks.</p>
+                    <h4 class="font-bold text-slate-200 mt-2">2. Limitation of Liability</h4>
+                    <p>Ebice provides client-side utility services on an "as-is" basis without warranties of any kind.</p>
+                `;
+            } else if (type === 'cookies') {
+                title.innerHTML = `<i data-lucide="cookie" class="w-5 h-5 text-brand-400"></i> Cookie Policy`;
+                body.innerHTML = `
+                    <p>Ebice uses essential LocalStorage items to maintain your logged-in state, daily streak, and visual preferences across browser sessions.</p>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeLegal() {
+            const modal = document.getElementById('legal-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Extended Gated Action Service dispatcher
+        function useGatedService(actionKey) {
+            if (!appState.currentUser) {
+                openAuthModal('login');
+                return;
+            }
+
+            if (actionKey === 'load-media') {
+                document.getElementById('media-input').click();
+            } else if (actionKey === 'process-media') {
+                processAndExportMedia();
+            } else if (actionKey === 'load-watermark-base') {
+                document.getElementById('wm-base-input').click();
+            } else if (actionKey === 'download-watermark') {
+                downloadWatermarkedImage();
+            } else if (actionKey === 'obfuscate-lua') {
+                obfuscateLua();
+            } else if (actionKey === 'generate-gif') {
+                generateAnimatedGIF();
+            } else if (actionKey === 'select-convert-img') {
+                document.getElementById('img-convert-input').click();
+            } else if (actionKey === 'execute-convert-img') {
+                executeImageConversion();
+            } else if (actionKey === 'download-glitch') {
+                downloadGlitchCanvas();
+            } else if (actionKey === 'export-pixel') {
+                exportPixelPNG();
+            } else if (actionKey.startsWith('tone-')) {
+                playTone(actionKey.split('-')[1]);
+            } else if (actionKey === 'format-json') {
+                formatJSON();
+            } else if (actionKey === 'encode-b64') {
+                encodeBase64();
+            } else if (actionKey === 'decode-b64') {
+                decodeBase64();
+            } else if (actionKey === 'spin-roulette') {
+                spinRoulette();
+            }
+        }
+
+        let isSelectingWaveform = false;
+        let waveDragStart = 0;
+
+        function initWaveformInteractions() {
+            const canvas = document.getElementById('waveform-canvas');
+            if (!canvas) return;
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (!audioBuffer) return;
+                isSelectingWaveform = true;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const time = (x / rect.width) * audioBuffer.duration;
+                waveDragStart = time;
+
+                document.getElementById('trim-start').value = time;
+                document.getElementById('trim-end').value = time;
+                updateTrimLabels();
+                drawWaveform();
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!audioBuffer) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+                const time = (x / rect.width) * audioBuffer.duration;
+
+                document.getElementById('waveform-cursor-time').textContent = `${time.toFixed(2)}s`;
+
+                if (isSelectingWaveform) {
+                    const tStart = Math.min(waveDragStart, time);
+                    const tEnd = Math.max(waveDragStart, time);
+                    document.getElementById('trim-start').value = tStart;
+                    document.getElementById('trim-end').value = tEnd;
+                    updateTrimLabels();
+                    drawWaveform();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isSelectingWaveform) {
+                    isSelectingWaveform = false;
+                    drawWaveform();
+                }
+            });
+        }
+
+        function updateTrimLabels() {
+            const startVal = parseFloat(document.getElementById('trim-start').value) || 0;
+            const endVal = parseFloat(document.getElementById('trim-end').value) || 0;
+            document.getElementById('trim-start-val').textContent = `${startVal.toFixed(2)}s`;
+            document.getElementById('trim-end-val').textContent = `${endVal.toFixed(2)}s`;
+            document.getElementById('trim-duration-val').textContent = `${Math.max(0, endVal - startVal).toFixed(2)}s`;
+        }
+
+        function drawWaveform() {
+            const canvas = document.getElementById('waveform-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.clientWidth;
+            const height = canvas.height = canvas.clientHeight;
+
+            if (!audioBuffer) return;
+
+            const data = audioBuffer.getChannelData(0);
+            const step = Math.ceil(data.length / width);
+            const amp = height / 2;
+
+            const startVal = parseFloat(document.getElementById('trim-start').value);
+            const endVal = parseFloat(document.getElementById('trim-end').value);
+            const duration = audioBuffer.duration;
+
+            const startPx = (startVal / duration) * width;
+            const endPx = (endVal / duration) * width;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (endPx > startPx) {
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.25)';
+                ctx.fillRect(startPx, 0, endPx - startPx, height);
+            }
+
+            for (let i = 0; i < width; i++) {
+                let min = 1.0;
+                let max = -1.0;
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+
+                if (i >= startPx && i <= endPx) {
+                    ctx.fillStyle = '#818cf8';
+                } else {
+                    ctx.fillStyle = '#334155';
+                }
+                ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+            }
+
+            ctx.fillStyle = '#6366f1';
+            ctx.fillRect(startPx - 1, 0, 3, height);
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(endPx - 1, 0, 3, height);
+        }
+
+        // --- MARK WATER (WATERMARK STUDIO) ENGINE ---
+        let wmBaseImage = null;
+        let wmAuxLogo = null;
+
+        function handleWatermarkBaseLoad(input) {
+            if (!input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                wmBaseImage = new Image();
+                wmBaseImage.onload = function() {
+                    document.getElementById('wm-placeholder').classList.add('hidden');
+                    renderWatermarkCanvas();
+                };
+                wmBaseImage.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function handleWatermarkLogoLoad(input) {
+            if (!input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                wmAuxLogo = new Image();
+                wmAuxLogo.onload = function() {
+                    renderWatermarkCanvas();
+                };
+                wmAuxLogo.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function toggleWmType() {
+            const type = document.getElementById('wm-type').value;
+            if (type === 'text') {
+                document.getElementById('wm-text-options').classList.remove('hidden');
+                document.getElementById('wm-image-options').classList.add('hidden');
+            } else {
+                document.getElementById('wm-text-options').classList.add('hidden');
+                document.getElementById('wm-image-options').classList.remove('hidden');
+            }
+            renderWatermarkCanvas();
+        }
+
+        function renderWatermarkCanvas() {
+            const canvas = document.getElementById('watermark-canvas');
+            if (!canvas || !wmBaseImage) return;
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = wmBaseImage.width;
+            canvas.height = wmBaseImage.height;
+
+            ctx.drawImage(wmBaseImage, 0, 0);
+
+            const type = document.getElementById('wm-type').value;
+            const position = document.getElementById('wm-position').value;
+            const opacity = parseInt(document.getElementById('wm-opacity').value) / 100;
+
+            ctx.globalAlpha = opacity;
+
+            if (type === 'text') {
+                const text = document.getElementById('wm-text').value || '';
+                const fontSize = parseInt(document.getElementById('wm-text-size').value) || 28;
+                const color = document.getElementById('wm-text-color').value || '#ffffff';
+
+                ctx.font = `bold ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                ctx.fillStyle = color;
+
+                if (position === 'tiled') {
+                    ctx.rotate(-Math.PI / 6);
+                    for (let x = -canvas.width; x < canvas.width * 2; x += 280) {
+                        for (let y = -canvas.height; y < canvas.height * 2; y += 120) {
+                            ctx.fillText(text, x, y);
+                        }
+                    }
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                } else {
+                    const metrics = ctx.measureText(text);
+                    let x = 20;
+                    let y = fontSize + 20;
+
+                    if (position === 'center') {
+                        x = (canvas.width - metrics.width) / 2;
+                        y = (canvas.height + fontSize) / 2;
+                    } else if (position === 'bottom-right') {
+                        x = canvas.width - metrics.width - 30;
+                        y = canvas.height - 30;
+                    } else if (position === 'bottom-left') {
+                        x = 30;
+                        y = canvas.height - 30;
+                    } else if (position === 'top-right') {
+                        x = canvas.width - metrics.width - 30;
+                        y = fontSize + 30;
+                    }
+
+                    ctx.fillText(text, Math.max(10, x), y);
+                }
+            } else if (type === 'image' && wmAuxLogo) {
+                const lw = wmAuxLogo.width * 0.5;
+                const lh = wmAuxLogo.height * 0.5;
+
+                let x = 20, y = 20;
+                if (position === 'center') {
+                    x = (canvas.width - lw) / 2;
+                    y = (canvas.height - lh) / 2;
+                } else if (position === 'bottom-right') {
+                    x = canvas.width - lw - 30;
+                    y = canvas.height - lh - 30;
+                } else if (position === 'bottom-left') {
+                    x = 30;
+                    y = canvas.height - lh - 30;
+                } else if (position === 'top-right') {
+                    x = canvas.width - lw - 30;
+                    y = 30;
+                }
+
+                ctx.drawImage(wmAuxLogo, x, y, lw, lh);
+            }
+
+            ctx.globalAlpha = 1.0;
+        }
+
+        function downloadWatermarkedImage() {
+            const canvas = document.getElementById('watermark-canvas');
+            if (!canvas || !wmBaseImage) return;
+
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = `watermarked_ebice_${Date.now()}.png`;
+            a.click();
+            addXP(15);
+        }
+
+        function renderGlitchCanvas() {
+            const canvas = document.getElementById('glitch-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const text = document.getElementById('glitch-text-input')?.value || "SYSTEM OVERRIDE";
+            const intensity = parseInt(document.getElementById('glitch-intensity')?.value || 8);
+
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = 'bold 32px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Red offset
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+            ctx.fillText(text, (canvas.width / 2) - (intensity / 2), canvas.height / 2);
+
+            // Cyan offset
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.8)';
+            ctx.fillText(text, (canvas.width / 2) + (intensity / 2), canvas.height / 2);
+
+            // Main text
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+        }
+
+        function updateGlassPreview() {
+            const card = document.getElementById('glass-demo-card');
+            if (!card) return;
+            const blur = document.getElementById('glass-blur').value;
+            const opacity = document.getElementById('glass-opacity').value / 100;
+            const border = document.getElementById('glass-border').value / 100;
+
+            card.style.background = `rgba(255, 255, 255, ${opacity})`;
+            card.style.backdropFilter = `blur(${blur}px)`;
+            card.style.borderColor = `rgba(255, 255, 255, ${border})`;
+
+            const cssText = `background: rgba(255, 255, 255, ${opacity});\nbackdrop-filter: blur(${blur}px);\nborder: 1px solid rgba(255, 255, 255, ${border});`;
+            document.getElementById('glass-css-output').value = cssText;
+        }
+
+        // Window Init Hook
+        window.onload = function() {
+            lucide.createIcons();
+            loadAppState();
+            renderGlitchCanvas();
+            updateGlassPreview();
+            initWaveformInteractions();
+        };
+    </script>
+</body>
+</html>
