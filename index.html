@@ -1,1360 +1,1079 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ebice v4.0 Ultimate | Web Utilities, Media Lab & Gamified Studio</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- gifshot for GIF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+    <title>Ebice — Roblox Lua Obfuscator</title>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811"
+            crossorigin="anonymous"></script>
+
+    <meta name="description" content="Ebice — modern multi-layer Lua obfuscator for Roblox. Rename identifiers, encrypt strings, flatten control flow.">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* ===== RESET & TOKENS ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --bg-0: #07080b;
+            --bg-1: #0d0f14;
+            --bg-2: #12151c;
+            --bg-3: #191d26;
+            --line: #232833;
+            --line-soft: #1a1e27;
+            --text-0: #f2f5fb;
+            --text-1: #a8b1c4;
+            --text-2: #616b80;
+            --accent: #6d5cff;
+            --accent-2: #22d3ee;
+            --accent-soft: rgba(109, 92, 255, 0.12);
+            --ok: #2dd4a7;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            background: var(--bg-0);
+            background-image:
+                radial-gradient(900px 500px at 15% -10%, rgba(109, 92, 255, 0.10), transparent 60%),
+                radial-gradient(800px 480px at 95% 10%, rgba(34, 211, 238, 0.06), transparent 55%);
+            background-attachment: fixed;
+            color: var(--text-0);
+            font-family: var(--sans);
+            font-size: 15px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            padding: 28px 20px 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ===== SHELL ===== */
+        .shell {
+            width: 100%;
+            max-width: 1320px;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(140deg, var(--accent), #4c3fd6 55%, #2b2a66);
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: -0.5px;
+            color: #fff;
+            box-shadow: 0 6px 20px -6px rgba(109, 92, 255, 0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .brand-name { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+        .brand-sub {
+            font-size: 11.5px;
+            color: var(--text-2);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .topbar-spacer { flex: 1; }
+
+        .engine-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 13px;
+            border-radius: 999px;
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-1);
+            font-family: var(--mono);
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--ok);
+            box-shadow: 0 0 0 3px rgba(45, 212, 167, 0.15);
+            animation: blink 2.4s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* ===== AD SLOT ===== */
+        .ad-slot {
+            margin-bottom: 18px;
+            min-height: 90px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--radius-md);
+            background: var(--bg-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .ad-slot .ad-label {
+            font-size: 10.5px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-2);
+            margin-right: 12px;
+            font-weight: 600;
+        }
+
+        /* ===== EDITOR GRID ===== */
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 880px) {
+            .editor-grid { grid-template-columns: 1fr; }
+        }
+
+        .pane {
+            background: var(--bg-1);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .pane:focus-within {
+            border-color: rgba(109, 92, 255, 0.55);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .pane-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--line-soft);
+            background: rgba(0, 0, 0, 0.18);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-2);
+        }
+
+        .pane-head .pane-label { color: var(--text-1); }
+
+        .pane-head .filename {
+            font-family: var(--mono);
+            font-size: 11.5px;
+            color: var(--text-2);
+            text-transform: none;
+            letter-spacing: 0;
+            background: var(--bg-3);
+            padding: 2px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--line-soft);
+        }
+
+        .pane-head .spacer { flex: 1; }
+
+        .pane-head .meter {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-2);
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .pane-body { flex: 1; display: flex; }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            min-height: 268px;
+            background: transparent;
+            border: 0;
+            outline: none;
+            resize: vertical;
+            padding: 16px 18px;
+            color: var(--text-0);
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.65;
+            tab-size: 4;
+            caret-color: var(--accent);
+        }
+
+        textarea::placeholder { color: #3c4352; font-style: normal; }
+
+        textarea.output {
+            color: #b9c4dc;
+            font-size: 12.5px;
+            word-break: break-word;
+        }
+
+        /* ===== OPTIONS PANEL ===== */
+        .options-panel {
+            background: var(--bg-1);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px 20px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-1);
+            margin-bottom: 15px;
+        }
+
+        .panel-title::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .panel-title .hint {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0;
+            text-transform: none;
+            color: var(--text-2);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+            gap: 6px 14px;
+        }
+
+        .opt {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 9px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.14s ease;
+            user-select: none;
+        }
+
+        .opt:hover { background: rgba(255, 255, 255, 0.028); }
+
+        .opt input {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 17px;
+            height: 17px;
+            margin-top: 2px;
+            border-radius: 5px;
+            border: 1.5px solid #323a49;
+            background: var(--bg-2);
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.14s ease;
+        }
+
+        .opt input:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(109, 92, 255, 0.45);
+        }
+
+        .opt input:checked::after {
+            content: "";
+            position: absolute;
+            left: 4.5px;
+            top: 1.5px;
+            width: 4px;
+            height: 8px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .opt-text { display: flex; flex-direction: column; gap: 1px; }
+
+        .opt-label {
+            font-size: 13px;
+            color: var(--text-0);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .opt-tag {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid rgba(109, 92, 255, 0.22);
+            padding: 0 5px;
+            border-radius: 4px;
+            letter-spacing: 0.02em;
+        }
+
+        .opt-desc { font-size: 11.5px; color: var(--text-2); }
+
+        /* ===== ACTION BAR ===== */
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-family: var(--sans);
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--line);
+            background: var(--bg-2);
+            color: var(--text-1);
+            transition: all 0.16s ease;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+
+        .btn:hover {
+            background: var(--bg-3);
+            color: var(--text-0);
+            border-color: #313a4b;
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #7a6bff, var(--accent));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 8px 24px -8px rgba(109, 92, 255, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            padding: 11px 24px;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #8a7dff, #7a6bff);
+            color: #fff;
+            box-shadow: 0 10px 30px -8px rgba(109, 92, 255, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-accent-outline {
+            background: transparent;
+            border-color: rgba(109, 92, 255, 0.4);
+            color: #b3a9ff;
+        }
+
+        .btn-accent-outline:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: #cfc8ff;
+        }
+
+        .btn .ico { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.9; }
+
+        .actions-spacer { flex: 1; }
+
+        .stats {
+            display: flex;
+            gap: 14px;
+            font-family: var(--mono);
+            font-size: 11.5px;
+            color: var(--text-2);
+            background: var(--bg-1);
+            border: 1px solid var(--line-soft);
+            padding: 7px 14px;
+            border-radius: 999px;
+        }
+
+        .stats b { color: var(--accent); font-weight: 600; }
+
+        /* ===== FOOTER ===== */
+        .foot {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 20px;
+            justify-content: center;
+            margin-top: 22px;
+            font-size: 11.5px;
+            color: var(--text-2);
+            letter-spacing: 0.02em;
+        }
+
+        .foot span { display: inline-flex; align-items: center; gap: 6px; }
+
+        .foot .sep {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-2);
+            opacity: 0.5;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--accent);
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+            font-size: 13px;
+            color: var(--text-0);
+            opacity: 0;
+            transform: translateY(14px);
+            pointer-events: none;
+            transition: opacity 0.24s ease, transform 0.24s ease;
+            z-index: 999;
+            max-width: 340px;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { border-left-color: #f0455e; }
+        .toast.info { border-left-color: var(--accent-2); }
+
+        .toast-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .toast.error .toast-indicator { background: #f0455e; }
+        .toast.info .toast-indicator { background: var(--accent-2); }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: #262c38;
+            border-radius: 999px;
+            border: 2px solid var(--bg-1);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #333b4b; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+<body>
 
-    <!-- TOP HEADER / NAV -->
-    <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="p-1.5 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center">
-                    <svg class="w-8 h-8" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M220 100 H240 V200 C300 200 340 240 340 300 C340 360 290 410 220 410 C180 410 140 380 130 350 H170 C180 365 200 375 220 375 C260 375 300 345 300 300 C300 255 260 235 220 235 H220 V100 Z" fill="#6366f1"/>
-                        <circle cx="210" cy="290" r="60" stroke="#6366f1" stroke-width="32" fill="none"/>
-                        <line x1="150" y1="290" x2="270" y2="290" stroke="#6366f1" stroke-width="28"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-blue-500 to-indigo-300 bg-clip-text text-transparent">Ebice v4.0 Ultimate</h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">All-in-One Utility, Media & Dev Suite</p>
-                </div>
+<div class="shell">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">E</div>
+            <div>
+                <div class="brand-name">Ebice</div>
+                <div class="brand-sub">Lua Obfuscator</div>
             </div>
-
-            <!-- Gamification, Theme Toggle & User Auth Status -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <!-- Streak Badge -->
-                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-xs font-semibold" title="Daily Streak">
-                    <i data-lucide="flame" class="w-4 h-4 fill-amber-400"></i>
-                    <span id="streak-counter">1 Day</span>
-                </div>
-
-                <!-- Level & XP -->
-                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 rounded-xl p-1.5 px-3">
-                    <div class="flex flex-col items-end">
-                        <span class="text-[11px] font-bold text-brand-400 uppercase tracking-wider">Lvl <span id="user-level">1</span></span>
-                        <div class="w-16 sm:w-20 bg-slate-700 h-1.5 rounded-full overflow-hidden mt-0.5">
-                            <div id="xp-progress" class="bg-gradient-to-r from-brand-500 to-indigo-400 h-full w-0 transition-all duration-300"></div>
-                        </div>
-                    </div>
-                    <span id="user-xp" class="text-xs font-semibold text-slate-300">0 XP</span>
-                </div>
-
-                <!-- User Account / Actions -->
-                <div id="auth-actions" class="flex items-center gap-2">
-                    <div id="guest-btn-group" class="flex items-center gap-2">
-                        <button onclick="openAuthModal('login')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">
-                            Sign In
-                        </button>
-                        <button onclick="openAuthModal('register')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-brand-600/20">
-                            Create Account
-                        </button>
-                    </div>
-
-                    <div id="user-badge-group" class="hidden relative">
-                        <button onclick="toggleUserDropdown()" class="flex items-center gap-2 bg-brand-900/40 border border-brand-500/30 hover:border-brand-500/60 p-1.5 px-3 rounded-xl transition">
-                            <div class="w-6 h-6 rounded-lg bg-brand-600 text-white flex items-center justify-center text-xs font-bold" id="user-avatar">
-                                U
-                            </div>
-                            <div class="flex flex-col text-left">
-                                <span id="display-username" class="text-xs font-bold text-slate-100 leading-none">Username</span>
-                                <span id="display-userid" class="text-[10px] font-mono text-brand-300 leading-none mt-1">#EBC-000000</span>
-                            </div>
-                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
-                        </button>
-
-                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50">
-                            <button onclick="openSettingsModal()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 flex items-center gap-2 transition">
-                                <i data-lucide="settings" class="w-4 h-4 text-brand-400"></i> Profile Settings
-                            </button>
-                            <div class="my-1 border-t border-slate-800"></div>
-                            <button onclick="logoutUser()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/40 flex items-center gap-2 transition">
-                                <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        </div>
+        <div class="topbar-spacer"></div>
+        <div class="engine-pill">
+            <span class="dot"></span>
+            Engine ready &middot; v2.4.0
         </div>
     </header>
 
-    <!-- AUTH MODAL -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-md w-full border border-slate-800 shadow-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-brand-600/20 text-brand-400 border border-brand-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <i data-lucide="lock" class="w-6 h-6"></i>
-                </div>
-                <h2 id="auth-modal-title" class="text-xl font-bold text-slate-100">Sign In to Ebice</h2>
-                <p id="auth-modal-sub" class="text-xs text-slate-400 mt-1">Please log in or register with a Username and Password to use this service.</p>
+    <!-- AD SLOT (top) -->
+    <div class="ad-slot" aria-label="Advertisement">
+        <span class="ad-label">Ad</span>
+        <ins class="adsbygoogle"
+             style="display:block; width:100%; min-height:90px;"
+             data-ad-client="ca-pub-7924204418079811"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
+
+    <!-- EDITOR -->
+    <main class="editor-grid">
+        <section class="pane">
+            <div class="pane-head">
+                <span class="pane-label">Source</span>
+                <span class="filename">script.lua</span>
+                <span class="spacer"></span>
+                <span class="meter" id="input-meter">0 lines</span>
             </div>
-
-            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
-                    <div class="relative">
-                        <i data-lucide="user" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
-                        <input type="text" id="auth-username" required placeholder="Enter username" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
-                    <div class="relative">
-                        <i data-lucide="key" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
-                        <input type="password" id="auth-password" required placeholder="Enter password" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-                    </div>
-                </div>
-
-                <div id="auth-error" class="hidden text-xs text-rose-400 bg-rose-950/50 border border-rose-800/50 p-2.5 rounded-lg text-center"></div>
-
-                <button type="submit" id="auth-submit-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-lg shadow-brand-600/25 flex items-center justify-center gap-2">
-                    <i data-lucide="log-in" class="w-4 h-4"></i> <span id="auth-submit-label">Sign In</span>
-                </button>
-            </form>
-
-            <div class="mt-4 pt-4 border-t border-slate-800 text-center flex items-center justify-between text-xs text-slate-400">
-                <span id="auth-toggle-msg">Don't have an account?</span>
-                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-brand-400 font-semibold hover:underline">Create Account</button>
+            <div class="pane-body">
+                <textarea id="input-code" placeholder="-- Paste your Roblox Lua code here&#10;-- Example:&#10;print(&quot;Hello Roblox&quot;)&#10;local coins = 100&#10;game.Players.LocalPlayer..." spellcheck="false"></textarea>
             </div>
+        </section>
+
+        <section class="pane">
+            <div class="pane-head">
+                <span class="pane-label">Obfuscated</span>
+                <span class="filename">protected.lua</span>
+                <span class="spacer"></span>
+                <span class="meter" id="output-meter">0 lines</span>
+            </div>
+            <div class="pane-body">
+                <textarea id="output-code" class="output" placeholder="-- The obfuscated output will appear here..." readonly spellcheck="false"></textarea>
+            </div>
+        </section>
+    </main>
+
+    <!-- OPTIONS -->
+    <section class="options-panel">
+        <div class="panel-title">
+            Obfuscation layers
+            <span class="hint">Select every layer you want to apply</span>
+        </div>
+        <div class="options-grid" id="options-grid"></div>
+    </section>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <button class="btn btn-primary" id="btn-run">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Obfuscate
+        </button>
+        <button class="btn btn-accent-outline" id="btn-copy">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy output
+        </button>
+        <button class="btn" id="btn-clear">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Clear
+        </button>
+        <button class="btn" id="btn-sample">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+            Load sample
+        </button>
+        <div class="actions-spacer"></div>
+        <div class="stats">
+            <span>in <b id="stat-in">0 B</b></span>
+            <span>out <b id="stat-out">0 B</b></span>
+            <span>ratio <b id="stat-ratio">&mdash;</b></span>
         </div>
     </div>
 
-    <!-- SETTINGS MODAL -->
-    <div id="settings-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-2xl p-6 sm:p-8 max-w-md w-full border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="p-3 bg-brand-600/20 text-brand-400 rounded-2xl border border-brand-500/30">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold text-slate-100">Profile & Studio Settings</h2>
-                    <p class="text-xs text-slate-400">Manage profile, account details, and custom UI appearance.</p>
-                </div>
-            </div>
-
-            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4 space-y-2 text-xs">
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Creation User ID:</span>
-                    <span id="settings-userid" class="font-mono text-brand-400 font-bold">#EBC-000000</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Total XP Earned:</span>
-                    <span id="settings-xp" class="font-bold text-slate-200">0 XP</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Files Processed:</span>
-                    <span id="settings-files" class="font-bold text-emerald-400">0 Files</span>
-                </div>
-            </div>
-
-            <form onsubmit="handleSaveSettings(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
-                    <input type="text" id="settings-username" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
-                </div>
-
-                <div class="pt-3 border-t border-slate-800 space-y-3">
-                    <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Custom Appearance
-                    </h3>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Custom Background Color</label>
-                        <div class="flex items-center gap-3">
-                            <input type="color" id="settings-bg-color" value="#020617" onchange="applyCustomBgColor(this.value)" class="w-10 h-10 bg-transparent border-0 rounded cursor-pointer">
-                            <div class="flex-1 flex gap-2">
-                                <button type="button" onclick="presetBgColor('#020617')" class="px-2.5 py-1 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Default Dark</button>
-                                <button type="button" onclick="presetBgColor('#0f172a')" class="px-2.5 py-1 text-[11px] bg-slate-900 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Slate Navy</button>
-                                <button type="button" onclick="presetBgColor('#18181b')" class="px-2.5 py-1 text-[11px] bg-zinc-900 border border-slate-800 rounded-lg text-slate-300 hover:border-slate-600">Charcoal</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-xs text-slate-300 mb-1">
-                            <label class="font-semibold">Glassmorphism UI Blur intensity</label>
-                            <span id="settings-blur-val" class="text-brand-400 font-mono">12px</span>
-                        </div>
-                        <input type="range" id="settings-ui-blur" min="0" max="24" value="12" class="w-full accent-brand-500" oninput="updateUIBlur(this.value)">
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20 mt-4">
-                    <i data-lucide="save" class="w-4 h-4"></i> Save Settings
-                </button>
-            </form>
-        </div>
+    <!-- AD SLOT (bottom) -->
+    <div class="ad-slot" aria-label="Advertisement" style="margin-top:22px;">
+        <span class="ad-label">Ad</span>
+        <ins class="adsbygoogle"
+             style="display:block; width:100%; min-height:90px;"
+             data-ad-client="ca-pub-7924204418079811"
+             data-ad-slot="9876543210"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="app-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full flex flex-col gap-6">
+    <!-- FOOTER -->
+    <footer class="foot">
+        <span>Multi-layer obfuscation</span>
+        <span class="sep"></span>
+        <span>Randomized identifiers</span>
+        <span class="sep"></span>
+        <span>String encryption</span>
+        <span class="sep"></span>
+        <span>Control flow flattening</span>
+        <span class="sep"></span>
+        <span>Lua 5.1 &middot; Roblox compatible</span>
+    </footer>
+</div>
 
-        <!-- NAVIGATION TABS -->
-        <nav class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 custom-scrollbar">
-            <button onclick="switchTab('media-editor')" id="tab-media-editor" class="tab-btn active-tab flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm bg-brand-600 text-white whitespace-nowrap transition">
-                <i data-lucide="scissors" class="w-4 h-4"></i> Audio/Video Studio & Extractor
-            </button>
-            <button onclick="switchTab('watermark-studio')" id="tab-watermark-studio" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="stamp" class="w-4 h-4"></i> Watermark Studio (Mark Water)
-            </button>
-            <button onclick="switchTab('roblox-obfuscator')" id="tab-roblox-obfuscator" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="shield-code" class="w-4 h-4"></i> Roblox Lua Obfuscator
-            </button>
-            <button onclick="switchTab('gif-creator')" id="tab-gif-creator" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="film" class="w-4 h-4"></i> Animated GIF Studio
-            </button>
-            <button onclick="switchTab('converter')" id="tab-converter" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="image" class="w-4 h-4"></i> Image Converter
-            </button>
-            <button onclick="switchTab('glitch-studio')" id="tab-glitch-studio" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="terminal" class="w-4 h-4"></i> Glitch & CRT FX
-            </button>
-            <button onclick="switchTab('pixel-art')" id="tab-pixel-art" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="palette" class="w-4 h-4"></i> Pixel Art Studio
-            </button>
-            <button onclick="switchTab('glassmorphism')" id="tab-glassmorphism" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="layout" class="w-4 h-4"></i> Glassmorphism UI
-            </button>
-            <button onclick="switchTab('audio-synth')" id="tab-audio-synth" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="music" class="w-4 h-4"></i> Tone Synthesizer
-            </button>
-            <button onclick="switchTab('dev-tools')" id="tab-dev-tools" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="code" class="w-4 h-4"></i> Dev & Text Utils
-            </button>
-            <button onclick="switchTab('unit-tools')" id="tab-unit-tools" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="hash" class="w-4 h-4"></i> Unit & Color Tools
-            </button>
-            <button onclick="switchTab('daily-roulette')" id="tab-daily-roulette" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs sm:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-900 whitespace-nowrap transition">
-                <i data-lucide="disc" class="w-4 h-4"></i> Daily Spin
-            </button>
-        </nav>
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-indicator"></span>
+    <span id="toast-msg">Done</span>
+</div>
 
-        <!-- 1. TAB: AUDIO/VIDEO STUDIO -->
-        <section id="content-media-editor" class="tab-content flex flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold flex items-center gap-2">
-                            <i data-lucide="scissors" class="w-5 h-5 text-brand-400"></i> MP3 / MP4 Media Trimmer & Interactive Audio Extractor
-                        </h2>
-                        <p class="text-sm text-slate-400 mt-1">Upload MP3, MP4, WAV, or WEBM. Click and drag directly on the waveform canvas to trim segments!</p>
-                    </div>
-                    <button onclick="useGatedService('load-media')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2 text-sm">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Load Audio / Video
-                        <input type="file" id="media-input" accept="audio/*,video/*" class="hidden" onchange="handleMediaLoad(this)">
-                    </button>
-                </div>
+<script>
+(function () {
+    'use strict';
 
-                <div id="media-placeholder" class="border-2 border-dashed border-slate-800 rounded-2xl p-10 text-center flex flex-col items-center justify-center gap-3">
-                    <div class="p-4 bg-slate-800/50 rounded-full text-slate-400">
-                        <i data-lucide="file-video" class="w-10 h-10"></i>
-                    </div>
-                    <p class="text-slate-300 font-medium">No media file loaded yet.</p>
-                    <p class="text-xs text-slate-500 max-w-md">Drag & drop or select an audio or video file above to start trimming audio or extracting sound.</p>
-                </div>
+    // ============================================================
+    // 1. OPTION DEFINITIONS
+    // ============================================================
+    const OPTIONS = [
+        { id: 'rename_locals',   label: 'Rename locals',       tag: 'var',   desc: 'Random names for local variables',       on: true },
+        { id: 'rename_params',   label: 'Rename parameters',   tag: 'param', desc: 'Scramble function arguments',            on: true },
+        { id: 'string_encrypt',  label: 'Encrypt strings',     tag: 'str',   desc: 'Base64-encoded string literals',         on: true },
+        { id: 'number_obf',      label: 'Obfuscate numbers',   tag: 'num',   desc: 'Arithmetic equivalent expressions',      on: true },
+        { id: 'control_flow',    label: 'Control flow',        tag: 'cfg',   desc: 'Inject opaque predicate jumps',          on: true },
+        { id: 'dead_code',       label: 'Dead code',           tag: 'dead',  desc: 'Insert unreachable blocks',              on: true },
+        { id: 'junk_code',       label: 'Junk code',           tag: 'junk',  desc: 'No-op operations injection',             on: false },
+        { id: 'split_strings',   label: 'Split strings',       tag: 'split', desc: 'Fragment literals into concatenation',   on: true },
+        { id: 'xor_strings',     label: 'XOR strings',         tag: 'xor',   desc: 'XOR-encoded literals at runtime',        on: true },
+        { id: 'proxy_functions', label: 'Proxy functions',     tag: 'proxy', desc: 'Wrap calls in accessor functions',       on: false },
+        { id: 'antitamper',      label: 'Anti-tamper guards',  tag: 'guard', desc: 'Fake integrity checks',                  on: false },
+        { id: 'hex_numbers',     label: 'Hex literals',        tag: 'hex',   desc: 'Render integers as hex',                 on: true }
+    ];
 
-                <div id="media-editor" class="hidden flex flex-col gap-6">
-                    <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 flex flex-col items-center justify-center relative">
-                        <video id="video-preview" class="hidden max-h-64 rounded-lg w-full object-contain mb-3" controls></video>
-                        <audio id="audio-preview" class="hidden w-full mb-3" controls></audio>
-                        
-                        <div class="w-full flex justify-between items-center text-xs text-slate-400 mb-2">
-                            <span class="flex items-center gap-1.5 font-medium"><i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-brand-400"></i> Interactive Timeline: Drag on Waveform to Set Cut Segment</span>
-                            <span class="font-mono text-brand-400" id="waveform-cursor-time">0.00s</span>
-                        </div>
-                        <canvas id="waveform-canvas" class="w-full h-28 bg-slate-900 rounded-lg border border-slate-800 cursor-crosshair transition-all"></canvas>
-                    </div>
+    // ============================================================
+    // 2. DOM
+    // ============================================================
+    const $ = (s) => document.querySelector(s);
+    const input = $('#input-code');
+    const output = $('#output-code');
+    const inputMeter = $('#input-meter');
+    const outputMeter = $('#output-meter');
+    const statIn = $('#stat-in');
+    const statOut = $('#stat-out');
+    const statRatio = $('#stat-ratio');
+    const toast = $('#toast');
+    const toastMsg = $('#toast-msg');
 
-                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 flex flex-col gap-4">
-                        <div class="flex items-center justify-between text-xs text-slate-400 font-semibold">
-                            <span>TRIM START: <span id="trim-start-val" class="text-brand-400 font-mono">0.00s</span></span>
-                            <span>DURATION: <span id="trim-duration-val" class="text-slate-200 font-mono">0.00s</span></span>
-                            <span>TRIM END: <span id="trim-end-val" class="text-brand-400 font-mono">0.00s</span></span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs text-slate-400 mb-1 block">Start Cut Time (s)</label>
-                                <input type="range" id="trim-start" min="0" max="100" value="0" step="0.1" class="w-full accent-brand-500" oninput="updateTrimFromSliders()">
-                            </div>
-                            <div>
-                                <label class="text-xs text-slate-400 mb-1 block">End Cut Time (s)</label>
-                                <input type="range" id="trim-end" min="0" max="100" value="100" step="0.1" class="w-full accent-brand-500" oninput="updateTrimFromSliders()">
-                            </div>
-                        </div>
+    let toastTimer = null;
 
-                        <button onclick="useGatedService('process-media')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 mt-2">
-                            <i data-lucide="download" class="w-4 h-4"></i> Cut & Export Trimmed Audio Track (+25 XP)
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
+    function showToast(msg, kind) {
+        clearTimeout(toastTimer);
+        toastMsg.textContent = msg;
+        toast.classList.remove('error', 'info');
+        if (kind === 'error') toast.classList.add('error');
+        if (kind === 'info') toast.classList.add('info');
+        toast.classList.add('show');
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
 
-        <!-- 2. WATERMARK STUDIO -->
-        <section id="content-watermark-studio" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold flex items-center gap-2">
-                            <i data-lucide="stamp" class="w-5 h-5 text-brand-400"></i> Mark Water Studio - Image Watermarking Tool
-                        </h2>
-                        <p class="text-sm text-slate-400 mt-1">Add custom text or logo overlay watermarks to images with full positioning and opacity controls.</p>
-                    </div>
-                    <button onclick="useGatedService('load-watermark-base')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2 text-sm">
-                        <i data-lucide="upload" class="w-4 h-4"></i> Upload Main Image
-                        <input type="file" id="wm-base-input" accept="image/*" class="hidden" onchange="handleWatermarkBaseLoad(this)">
-                    </button>
-                </div>
+    // ============================================================
+    // 3. BUILD OPTIONS UI
+    // ============================================================
+    function buildOptions() {
+        const grid = $('#options-grid');
+        grid.innerHTML = '';
+        OPTIONS.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'opt';
+            label.innerHTML = `
+                <input type="checkbox" data-id="${opt.id}" ${opt.on ? 'checked' : ''}>
+                <span class="opt-text">
+                    <span class="opt-label">${opt.label}<span class="opt-tag">${opt.tag}</span></span>
+                    <span class="opt-desc">${opt.desc}</span>
+                </span>
+            `;
+            grid.appendChild(label);
+        });
+    }
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-1 bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-4">
-                        <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider">Watermark Controls</h3>
+    function readOptions() {
+        const map = {};
+        document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => {
+            map[cb.dataset.id] = cb.checked;
+        });
+        return map;
+    }
 
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Watermark Type</label>
-                            <select id="wm-type" onchange="toggleWmType()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
-                                <option value="text">Text Watermark</option>
-                                <option value="image">Image Logo Overlay</option>
-                            </select>
-                        </div>
+    // ============================================================
+    // 4. UTILITIES
+    // ============================================================
+    const HEX = '0123456789abcdef';
 
-                        <div id="wm-text-options" class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Watermark Text</label>
-                                <input type="text" id="wm-text" value="EBICE WATERMARK" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200" oninput="renderWatermarkCanvas()">
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Font Color</label>
-                                    <input type="color" id="wm-text-color" value="#ffffff" class="w-full h-8 bg-transparent cursor-pointer rounded" onchange="renderWatermarkCanvas()">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Font Size</label>
-                                    <input type="number" id="wm-text-size" value="28" min="10" max="120" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200" oninput="renderWatermarkCanvas()">
-                                </div>
-                            </div>
-                        </div>
+    function randInt(max) {
+        if (max <= 0) return 0;
+        return Math.floor(Math.random() * max);
+    }
 
-                        <div id="wm-image-options" class="hidden space-y-3">
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Upload Logo Image</label>
-                            <button onclick="document.getElementById('wm-logo-input').click()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs py-2 rounded-xl border border-slate-800 transition flex items-center justify-center gap-2">
-                                <i data-lucide="image" class="w-3.5 h-3.5"></i> Select Logo File
-                            </button>
-                            <input type="file" id="wm-logo-input" accept="image/*" class="hidden" onchange="handleWatermarkLogoLoad(this)">
-                        </div>
+    function randHex(len) {
+        let s = '';
+        for (let i = 0; i < len; i++) s += HEX[randInt(16)];
+        return s;
+    }
 
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Position Preset</label>
-                            <select id="wm-position" onchange="renderWatermarkCanvas()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
-                                <option value="center">Center</option>
-                                <option value="bottom-right" selected>Bottom Right</option>
-                                <option value="bottom-left">Bottom Left</option>
-                                <option value="top-right">Top Right</option>
-                                <option value="top-left">Top Left</option>
-                                <option value="tiled">Tiled Pattern</option>
-                            </select>
-                        </div>
+    function randVarName() {
+        const prefixes = ['_', '__', 'l_', 'v_', 'o_', 'x_', '_0x'];
+        return prefixes[randInt(prefixes.length)] + randHex(6);
+    }
 
-                        <div>
-                            <div class="flex justify-between text-xs text-slate-300 mb-1">
-                                <label class="font-semibold">Opacity</label>
-                                <span id="wm-opacity-val" class="text-brand-400 font-mono">50%</span>
-                            </div>
-                            <input type="range" id="wm-opacity" min="5" max="100" value="50" class="w-full accent-brand-500" oninput="document.getElementById('wm-opacity-val').textContent = this.value + '%'; renderWatermarkCanvas();">
-                        </div>
+    function toBase64(str) {
+        try {
+            return btoa(unescape(encodeURIComponent(str)));
+        } catch (e) {
+            return btoa(str.split('').map(c => c.charCodeAt(0).toString(16)).join(''));
+        }
+    }
 
-                        <button onclick="useGatedService('download-watermark')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
-                            <i data-lucide="download" class="w-4 h-4"></i> Export Watermarked Image (+15 XP)
-                        </button>
-                    </div>
+    function xorString(str, key) {
+        let out = '';
+        for (let i = 0; i < str.length; i++) {
+            out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return out;
+    }
 
-                    <div class="lg:col-span-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col items-center justify-center min-h-[300px]">
-                        <canvas id="watermark-canvas" class="max-w-full max-h-[450px] rounded-xl border border-slate-800 shadow-xl"></canvas>
-                        <p id="wm-placeholder" class="text-xs text-slate-500 mt-2">Upload a main image to preview watermark overlay.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    function escapeLuaString(str) {
+        return str
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r');
+    }
 
-        <!-- 3. ROBLOX LUA OBFUSCATOR -->
-        <section id="content-roblox-obfuscator" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="shield-code" class="w-5 h-5 text-brand-400"></i> Roblox Lua Code Obfuscator
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Bytearray virtualization, XOR string escaping, and junk code injection for Roblox Lua scripts.</p>
+    function byteSize(str) {
+        return new Blob([str]).size;
+    }
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-semibold text-slate-300">Raw Lua Script</label>
-                            <button onclick="document.getElementById('lua-input').value=''" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
-                        </div>
-                        <textarea id="lua-input" rows="12" placeholder="-- Paste your Roblox Lua script here...&#10;print('Hello Ebice World!')" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500 custom-scrollbar"></textarea>
-                    </div>
+    function formatBytes(n) {
+        if (n < 1024) return n + ' B';
+        if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+        return (n / (1024 * 1024)).toFixed(2) + ' MB';
+    }
 
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-semibold text-brand-400">Obfuscated Output</label>
-                            <button onclick="copyToClipboard('lua-output')" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
-                                <i data-lucide="copy" class="w-3 h-3"></i> Copy Output
-                            </button>
-                        </div>
-                        <textarea id="lua-output" rows="12" readonly placeholder="Obfuscated code will appear here..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 focus:outline-none custom-scrollbar"></textarea>
-                    </div>
-                </div>
+    function updateMeters() {
+        const inLines = input.value ? input.value.split('\n').length : 0;
+        const outLines = output.value ? output.value.split('\n').length : 0;
+        inputMeter.textContent = inLines + (inLines === 1 ? ' line' : ' lines');
+        outputMeter.textContent = outLines + (outLines === 1 ? ' line' : ' lines');
 
-                <div class="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-800">
-                    <div class="flex items-center gap-4 text-xs text-slate-400">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="obf-junk" checked class="rounded accent-brand-500"> Inject Junk Loops
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="obf-xor" checked class="rounded accent-brand-500"> Byte Escaping
-                        </label>
-                    </div>
+        const inBytes = byteSize(input.value);
+        const outBytes = byteSize(output.value);
+        statIn.textContent = formatBytes(inBytes);
+        statOut.textContent = formatBytes(outBytes);
+        if (inBytes > 0 && outBytes > 0) {
+            statRatio.textContent = (outBytes / inBytes).toFixed(2) + 'x';
+        } else {
+            statRatio.innerHTML = '&mdash;';
+        }
+    }
 
-                    <button onclick="useGatedService('obfuscate-lua')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center gap-2 text-sm">
-                        <i data-lucide="lock" class="w-4 h-4"></i> Obfuscate Roblox Script (+20 XP)
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. ANIMATED GIF STUDIO -->
-        <section id="content-gif-creator" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="film" class="w-5 h-5 text-brand-400"></i> Animated GIF Creator
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Create animated spinning or pulsing GIF logos directly in-browser.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div class="flex flex-col gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Banner / Logo Text</label>
-                            <input type="text" id="gif-text-input" value="EBICE STUDIO" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Animation Style</label>
-                            <select id="gif-anim-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200">
-                                <option value="spin">360° Rotation Spin</option>
-                                <option value="pulse">Breathing Pulse Zoom</option>
-                            </select>
-                        </div>
-
-                        <button onclick="useGatedService('generate-gif')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
-                            <i data-lucide="play" class="w-4 h-4"></i> Render Animated GIF (+20 XP)
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center min-h-[220px]">
-                        <img id="gif-preview-result" class="hidden max-h-48 rounded-lg shadow-lg" alt="Generated GIF">
-                        <div id="gif-placeholder-text" class="text-xs text-slate-500 text-center">
-                            Click "Render Animated GIF" to compile frames and view animation here.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. IMAGE CONVERTER -->
-        <section id="content-converter" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 text-center">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2 justify-center">
-                    <i data-lucide="image" class="w-5 h-5 text-brand-400"></i> Multi-Format Image Converter
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Convert PNG, JPG, and WebP formats instantly inside your browser without external servers.</p>
-
-                <div class="max-w-xl mx-auto flex flex-col gap-4">
-                    <input type="file" id="img-convert-input" accept="image/*" class="hidden" onchange="previewImageToConvert(this)">
-                    <button onclick="useGatedService('select-convert-img')" class="cursor-pointer border-2 border-dashed border-slate-800 hover:border-brand-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 transition w-full">
-                        <i data-lucide="upload-cloud" class="w-10 h-10 text-brand-400"></i>
-                        <span id="convert-file-name" class="text-sm font-medium text-slate-300">Click to Select Image File</span>
-                    </button>
-
-                    <div id="convert-options" class="hidden flex flex-col gap-4 pt-4 border-t border-slate-800">
-                        <div class="flex items-center justify-center gap-3">
-                            <label class="text-xs text-slate-300">Target Output Format:</label>
-                            <select id="target-img-format" class="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg px-3 py-2">
-                                <option value="image/png">PNG Format</option>
-                                <option value="image/jpeg">JPEG Format</option>
-                                <option value="image/webp">WEBP Format</option>
-                            </select>
-                        </div>
-                        <button onclick="useGatedService('execute-convert-img')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i> Convert & Download Image (+15 XP)
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 6. GLITCH & CRT FX -->
-        <section id="content-glitch-studio" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="terminal" class="w-5 h-5 text-brand-400"></i> Glitch & Retro CRT FX Studio
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Apply digital displacement slices and RGB chromatic aberration to text.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex flex-col gap-4">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-300 block mb-1">Cyber Text Title</label>
-                            <input type="text" id="glitch-text-input" value="SYSTEM OVERRIDE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-200" oninput="renderGlitchCanvas()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-300 block mb-1">Glitch Slice Intensity</label>
-                            <input type="range" id="glitch-intensity" min="1" max="20" value="8" class="w-full accent-brand-500" oninput="renderGlitchCanvas()">
-                        </div>
-                        <button onclick="useGatedService('download-glitch')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i> Download Cyber Art (+15 XP)
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-950 rounded-2xl border border-slate-800 p-4 flex items-center justify-center min-h-[200px]">
-                        <canvas id="glitch-canvas" width="400" height="200" class="max-w-full rounded-lg"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 7. PIXEL ART STUDIO -->
-        <section id="content-pixel-art" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="palette" class="w-5 h-5 text-brand-400"></i> Pixel Art Studio & Grid
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Draw 16x16 retro sprite artwork in real time.</p>
-
-                <div class="flex flex-col md:flex-row gap-6 items-center justify-center">
-                    <canvas id="pixel-canvas" width="256" height="256" class="bg-slate-950 border-2 border-slate-700 rounded-xl cursor-crosshair shadow-2xl"></canvas>
-                    <div class="flex flex-col gap-3 w-full md:w-auto">
-                        <label class="text-xs font-semibold text-slate-300">Pen Color</label>
-                        <input type="color" id="pixel-color" value="#6366f1" class="w-full h-10 bg-transparent rounded cursor-pointer">
-                        <button onclick="clearPixelCanvas()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-xl transition">Clear Canvas</button>
-                        <button onclick="useGatedService('export-pixel')" class="bg-brand-600 hover:bg-brand-500 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export PNG Artwork (+15 XP)
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 8. GLASSMORPHISM BUILDER -->
-        <section id="content-glassmorphism" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="layout" class="w-5 h-5 text-brand-400"></i> Glassmorphism UI Builder
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Customize glass card opacity and backdrop blur with CSS generation.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-300 block mb-1">Blur Radius (px)</label>
-                            <input type="range" id="glass-blur" min="0" max="30" value="12" class="w-full accent-brand-500" oninput="updateGlassPreview()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-300 block mb-1">Background Opacity</label>
-                            <input type="range" id="glass-opacity" min="0" max="100" value="25" class="w-full accent-brand-500" oninput="updateGlassPreview()">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-300 block mb-1">Border Opacity</label>
-                            <input type="range" id="glass-border" min="0" max="100" value="15" class="w-full accent-brand-500" oninput="updateGlassPreview()">
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-4">
-                        <div id="glass-demo-card" class="p-6 rounded-2xl border flex flex-col gap-2 min-h-[140px] justify-center">
-                            <h4 class="font-bold text-slate-100">Glassmorphism Card</h4>
-                            <p class="text-xs text-slate-300">Live preview card adjusting according to controls.</p>
-                        </div>
-                        <textarea id="glass-css-output" rows="3" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-400 focus:outline-none"></textarea>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 9. TONE SYNTHESIZER -->
-        <section id="content-audio-synth" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 text-center">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2 justify-center">
-                    <i data-lucide="music" class="w-5 h-5 text-brand-400"></i> Audio & Tone Synthesizer
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Generate sine, square, or sawtooth sound frequencies in real-time.</p>
-
-                <div class="max-w-md mx-auto flex flex-col gap-4">
-                    <div class="flex items-center justify-between text-xs text-slate-300">
-                        <span>Frequency: <span id="freq-val" class="text-brand-400 font-mono">440 Hz</span></span>
-                    </div>
-                    <input type="range" id="freq-slider" min="100" max="2000" value="440" class="w-full accent-brand-500" oninput="document.getElementById('freq-val').textContent = this.value + ' Hz'">
-                    
-                    <div class="flex justify-center gap-3">
-                        <button onclick="useGatedService('tone-sine')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Sine Tone</button>
-                        <button onclick="useGatedService('tone-square')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Square Wave</button>
-                        <button onclick="useGatedService('tone-sawtooth')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">Sawtooth</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 10. DEV TOOLS -->
-        <section id="content-dev-tools" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="code" class="w-5 h-5 text-brand-400"></i> Dev & Text Utilities Studio
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Format JSON, Encode/Decode Base64, or format text data instantly.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-300 block mb-1">Input Text / Raw JSON</label>
-                        <textarea id="dev-input" rows="8" placeholder="Enter text here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-400 block mb-1">Formatted Output</label>
-                        <textarea id="dev-output" rows="8" readonly placeholder="Output will render here..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-400 focus:outline-none"></textarea>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap gap-3 mt-4">
-                    <button onclick="useGatedService('format-json')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Format JSON</button>
-                    <button onclick="useGatedService('encode-b64')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Base64 Encode</button>
-                    <button onclick="useGatedService('decode-b64')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl">Base64 Decode</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 11. UNIT TOOLS -->
-        <section id="content-unit-tools" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="hash" class="w-5 h-5 text-brand-400"></i> Unit & Color Converter Studio
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Convert Pixels to REM units and HEX colors to RGB triplets.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h4 class="font-bold text-sm text-slate-200">PX to REM Converter</h4>
-                        <div class="flex items-center gap-3">
-                            <input type="number" id="px-val" value="16" class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded-lg" oninput="convertPxToRem()">
-                            <span class="text-xs text-slate-400">px =</span>
-                            <span id="rem-result" class="text-sm font-bold text-brand-400 font-mono">1.00rem</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                        <h4 class="font-bold text-sm text-slate-200">Color Converter (HEX to RGB)</h4>
-                        <div class="flex items-center gap-3">
-                            <input type="color" id="color-picker" value="#6366f1" class="w-10 h-10 rounded cursor-pointer bg-transparent" oninput="convertColor()">
-                            <span id="color-rgb-result" class="text-xs font-mono text-slate-300">rgb(99, 102, 241)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 12. DAILY SPIN -->
-        <section id="content-daily-roulette" class="tab-content hidden flex-col gap-6">
-            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col items-center text-center">
-                <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
-                    <i data-lucide="disc" class="w-5 h-5 text-amber-400"></i> Daily Bonus Spin
-                </h2>
-                <p class="text-sm text-slate-400 mb-6">Spin daily to unlock free bonus XP!</p>
-
-                <div class="w-48 h-48 border-4 border-amber-500/40 rounded-full flex items-center justify-center bg-slate-950 text-amber-400 font-extrabold text-2xl shadow-2xl relative mb-6">
-                    <span id="roulette-wheel">SPIN</span>
-                </div>
-                <button id="btn-spin" onclick="useGatedService('spin-roulette')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-8 py-3 rounded-xl shadow-lg transition">Spin Wheel!</button>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- MAIN ENGINE SCRIPT -->
-    <script>
-        let appState = {
-            currentUser: { username: "Guest User", id: "#EBC-100001" }, // Auto sign-in for seamless experience
-            xp: 50,
-            level: 1,
-            streak: 1,
-            filesProcessed: 0,
-            customBg: '#020617',
-            uiBlur: '12px'
-        };
-
-        // Audio & Engine variables
-        let audioCtx = null;
-        let audioBuffer = null;
-        let loadedConvertFile = null;
-
-        function loadAppState() {
-            const saved = localStorage.getItem('ebice_v4_appstate');
-            if (saved) {
-                try { appState = { ...appState, ...JSON.parse(saved) }; } catch(e){}
-            }
-            updateUserUI();
+    // ============================================================
+    // 5. OBFUSCATION ENGINE
+    // ============================================================
+    function obfuscateLua(code, opts) {
+        if (!code.trim()) {
+            return '-- [no source code]\n-- Paste Lua code in the left pane.';
         }
 
-        function saveAppState() {
-            localStorage.setItem('ebice_v4_appstate', JSON.stringify(appState));
-            updateUserUI();
-        }
+        let src = code;
 
-        function updateUserUI() {
-            document.getElementById('user-level').textContent = appState.level;
-            document.getElementById('user-xp').textContent = appState.xp + ' XP';
-            document.getElementById('streak-counter').textContent = appState.streak + ' Days';
-            
-            const currentLevelXP = appState.xp % 100;
-            document.getElementById('xp-progress').style.width = currentLevelXP + '%';
+        // -------- Phase 1: rename locals & params --------
+        if (opts.rename_locals || opts.rename_params) {
+            const varMap = new Map();
+            const reserved = ['local','function','end','if','then','else','elseif','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','in'];
 
-            if (appState.currentUser) {
-                document.getElementById('guest-btn-group').classList.add('hidden');
-                document.getElementById('user-badge-group').classList.remove('hidden');
-                document.getElementById('display-username').textContent = appState.currentUser.username;
-                document.getElementById('display-userid').textContent = appState.currentUser.id;
-                document.getElementById('user-avatar').textContent = appState.currentUser.username.charAt(0).toUpperCase();
-
-                document.getElementById('settings-username').value = appState.currentUser.username;
-                document.getElementById('settings-userid').textContent = appState.currentUser.id;
-                document.getElementById('settings-xp').textContent = appState.xp + ' XP';
-                document.getElementById('settings-files').textContent = appState.filesProcessed + ' Files';
-            }
-        }
-
-        function addXP(amount) {
-            appState.xp += amount;
-            appState.filesProcessed += 1;
-            appState.level = Math.floor(appState.xp / 100) + 1;
-            saveAppState();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active-tab', 'bg-brand-600', 'text-white');
-                el.classList.add('text-slate-400');
-            });
-
-            const targetContent = document.getElementById('content-' + tabId);
-            const targetTab = document.getElementById('tab-' + tabId);
-
-            if (targetContent) targetContent.classList.remove('hidden');
-            if (targetTab) {
-                targetTab.classList.add('active-tab', 'bg-brand-600', 'text-white');
-                targetTab.classList.remove('text-slate-400');
-            }
-        }
-
-        // AUTH & SETTINGS
-        function openAuthModal(mode) {
-            document.getElementById('auth-modal').classList.remove('hidden');
-        }
-        function closeAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
-        function toggleAuthMode() {}
-        function handleAuthSubmit(e) {
-            e.preventDefault();
-            const username = document.getElementById('auth-username').value.trim();
-            if (username) {
-                appState.currentUser = { username: username, id: '#EBC-' + Math.floor(100000 + Math.random() * 900000) };
-                saveAppState();
-                closeAuthModal();
-            }
-        }
-        function toggleUserDropdown() {
-            document.getElementById('user-dropdown').classList.toggle('hidden');
-        }
-        function logoutUser() {
-            appState.currentUser = null;
-            document.getElementById('guest-btn-group').classList.remove('hidden');
-            document.getElementById('user-badge-group').classList.add('hidden');
-            document.getElementById('user-dropdown').classList.add('hidden');
-        }
-        function openSettingsModal() {
-            document.getElementById('user-dropdown').classList.add('hidden');
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-        function handleSaveSettings(e) {
-            e.preventDefault();
-            if (appState.currentUser) {
-                appState.currentUser.username = document.getElementById('settings-username').value.trim();
-            }
-            saveAppState();
-            closeSettingsModal();
-        }
-        function applyCustomBgColor(hex) {
-            document.body.style.backgroundColor = hex;
-        }
-        function presetBgColor(hex) {
-            applyCustomBgColor(hex);
-        }
-        function updateUIBlur(val) {
-            document.getElementById('settings-blur-val').textContent = val + 'px';
-            document.querySelectorAll('.glass-panel').forEach(el => el.style.backdropFilter = `blur(${val}px)`);
-        }
-
-        // SERVICE GATE DISPATCHER
-        function useGatedService(actionKey) {
-            if (!appState.currentUser) {
-                openAuthModal('login');
-                return;
-            }
-
-            if (actionKey === 'load-media') document.getElementById('media-input').click();
-            else if (actionKey === 'process-media') exportTrimmedAudio();
-            else if (actionKey === 'load-watermark-base') document.getElementById('wm-base-input').click();
-            else if (actionKey === 'download-watermark') downloadWatermarkedImage();
-            else if (actionKey === 'obfuscate-lua') obfuscateLua();
-            else if (actionKey === 'generate-gif') generateAnimatedGIF();
-            else if (actionKey === 'select-convert-img') document.getElementById('img-convert-input').click();
-            else if (actionKey === 'execute-convert-img') executeImageConversion();
-            else if (actionKey === 'download-glitch') downloadGlitchCanvas();
-            else if (actionKey === 'export-pixel') exportPixelPNG();
-            else if (actionKey.startsWith('tone-')) playTone(actionKey.split('-')[1]);
-            else if (actionKey === 'format-json') formatJSON();
-            else if (actionKey === 'encode-b64') encodeBase64();
-            else if (actionKey === 'decode-b64') decodeBase64();
-            else if (actionKey === 'spin-roulette') spinRoulette();
-        }
-
-        // --- MEDIA TRIMMER ENGINE ---
-        function handleMediaLoad(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            document.getElementById('media-placeholder').classList.add('hidden');
-            document.getElementById('media-editor').classList.remove('hidden');
-
-            const url = URL.createObjectURL(file);
-            const isVideo = file.type.startsWith('video');
-
-            const videoEl = document.getElementById('video-preview');
-            const audioEl = document.getElementById('audio-preview');
-
-            if (isVideo) {
-                videoEl.src = url;
-                videoEl.classList.remove('hidden');
-                audioEl.classList.add('hidden');
-            } else {
-                audioEl.src = url;
-                audioEl.classList.remove('hidden');
-                videoEl.classList.add('hidden');
-            }
-
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                audioCtx.decodeAudioData(e.target.result, function(buffer) {
-                    audioBuffer = buffer;
-                    const duration = buffer.duration;
-                    
-                    const startSlider = document.getElementById('trim-start');
-                    const endSlider = document.getElementById('trim-end');
-
-                    startSlider.max = duration;
-                    startSlider.value = 0;
-                    endSlider.max = duration;
-                    endSlider.value = duration;
-
-                    updateTrimFromSliders();
-                    drawWaveform();
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function updateTrimFromSliders() {
-            const start = parseFloat(document.getElementById('trim-start').value);
-            const end = parseFloat(document.getElementById('trim-end').value);
-            
-            document.getElementById('trim-start-val').textContent = start.toFixed(2) + 's';
-            document.getElementById('trim-end-val').textContent = end.toFixed(2) + 's';
-            document.getElementById('trim-duration-val').textContent = Math.max(0, end - start).toFixed(2) + 's';
-            drawWaveform();
-        }
-
-        function drawWaveform() {
-            const canvas = document.getElementById('waveform-canvas');
-            if (!canvas || !audioBuffer) return;
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width = canvas.clientWidth;
-            const height = canvas.height = canvas.clientHeight;
-
-            const data = audioBuffer.getChannelData(0);
-            const step = Math.ceil(data.length / width);
-            const amp = height / 2;
-
-            const startVal = parseFloat(document.getElementById('trim-start').value);
-            const endVal = parseFloat(document.getElementById('trim-end').value);
-            const duration = audioBuffer.duration;
-
-            const startPx = (startVal / duration) * width;
-            const endPx = (endVal / duration) * width;
-
-            ctx.clearRect(0, 0, width, height);
-
-            if (endPx > startPx) {
-                ctx.fillStyle = 'rgba(99, 102, 241, 0.25)';
-                ctx.fillRect(startPx, 0, endPx - startPx, height);
-            }
-
-            for (let i = 0; i < width; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j];
-                    if (datum < min) min = datum;
-                    if (datum > max) max = datum;
-                }
-                ctx.fillStyle = (i >= startPx && i <= endPx) ? '#818cf8' : '#334155';
-                ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
-            }
-
-            ctx.fillStyle = '#6366f1';
-            ctx.fillRect(startPx - 1, 0, 3, height);
-            ctx.fillStyle = '#f43f5e';
-            ctx.fillRect(endPx - 1, 0, 3, height);
-        }
-
-        function exportTrimmedAudio() {
-            if (!audioBuffer) return;
-            const start = parseFloat(document.getElementById('trim-start').value);
-            const end = parseFloat(document.getElementById('trim-end').value);
-            
-            const rate = audioBuffer.sampleRate;
-            const startFrame = Math.floor(start * rate);
-            const endFrame = Math.floor(end * rate);
-            const frameCount = endFrame - startFrame;
-
-            if (frameCount <= 0) return;
-
-            const newBuffer = audioCtx.createBuffer(audioBuffer.numberOfChannels, frameCount, rate);
-            for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
-                const nowBuffering = newBuffer.getChannelData(channel);
-                const originalData = audioBuffer.getChannelData(channel);
-                for (let i = 0; i < frameCount; i++) {
-                    nowBuffering[i] = originalData[startFrame + i];
-                }
-            }
-
-            // Export to WAV
-            const wavBlob = bufferToWave(newBuffer, frameCount);
-            const url = URL.createObjectURL(wavBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `trimmed_ebice_${Date.now()}.wav`;
-            a.click();
-            addXP(25);
-        }
-
-        function bufferToWave(abuffer, len) {
-            let numOfChan = abuffer.numberOfChannels,
-                length = len * numOfChan * 2 + 44,
-                out = new DataView(new ArrayBuffer(length)),
-                channels = [], i, sample, offset = 0, pos = 0;
-
-            function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
-            function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
-
-            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
-            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
-            setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
-            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
-
-            for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
-
-            while (offset < len) {
-                for (i = 0; i < numOfChan; i++) {
-                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-                    out.setInt16(pos, sample, true); pos += 2;
-                }
-                offset++;
-            }
-            return new Blob([out], { type: "audio/wav" });
-        }
-
-        // --- WATERMARK STUDIO ENGINE ---
-        let wmBaseImage = null, wmAuxLogo = null;
-        function handleWatermarkBaseLoad(input) {
-            if (!input.files[0]) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                wmBaseImage = new Image();
-                wmBaseImage.onload = function() {
-                    document.getElementById('wm-placeholder').classList.add('hidden');
-                    renderWatermarkCanvas();
-                };
-                wmBaseImage.src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-        function handleWatermarkLogoLoad(input) {
-            if (!input.files[0]) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                wmAuxLogo = new Image();
-                wmAuxLogo.onload = function() { renderWatermarkCanvas(); };
-                wmAuxLogo.src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-        function toggleWmType() {
-            const type = document.getElementById('wm-type').value;
-            document.getElementById('wm-text-options').classList.toggle('hidden', type !== 'text');
-            document.getElementById('wm-image-options').classList.toggle('hidden', type === 'text');
-            renderWatermarkCanvas();
-        }
-        function renderWatermarkCanvas() {
-            const canvas = document.getElementById('watermark-canvas');
-            if (!canvas || !wmBaseImage) return;
-
-            const ctx = canvas.getContext('2d');
-            canvas.width = wmBaseImage.width;
-            canvas.height = wmBaseImage.height;
-            ctx.drawImage(wmBaseImage, 0, 0);
-
-            const type = document.getElementById('wm-type').value;
-            const position = document.getElementById('wm-position').value;
-            const opacity = parseInt(document.getElementById('wm-opacity').value) / 100;
-
-            ctx.globalAlpha = opacity;
-
-            if (type === 'text') {
-                const text = document.getElementById('wm-text').value || '';
-                const fontSize = parseInt(document.getElementById('wm-text-size').value) || 28;
-                const color = document.getElementById('wm-text-color').value || '#ffffff';
-
-                ctx.font = `bold ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                ctx.fillStyle = color;
-
-                if (position === 'tiled') {
-                    for (let x = 0; x < canvas.width; x += 300) {
-                        for (let y = fontSize; y < canvas.height; y += 150) {
-                            ctx.fillText(text, x, y);
-                        }
+            if (opts.rename_locals) {
+                const localRe = /\blocal\s+([a-zA-Z_][a-zA-Z0-9_]*)/g;
+                let m;
+                while ((m = localRe.exec(src)) !== null) {
+                    const name = m[1];
+                    if (!varMap.has(name) && !reserved.includes(name)) {
+                        varMap.set(name, randVarName());
                     }
-                } else {
-                    const metrics = ctx.measureText(text);
-                    let x = 30, y = canvas.height - 30;
-                    if (position === 'center') { x = (canvas.width - metrics.width)/2; y = (canvas.height + fontSize)/2; }
-                    else if (position === 'top-right') { x = canvas.width - metrics.width - 30; y = fontSize + 30; }
-                    else if (position === 'top-left') { x = 30; y = fontSize + 30; }
-                    else if (position === 'bottom-right') { x = canvas.width - metrics.width - 30; }
-                    ctx.fillText(text, Math.max(10, x), y);
                 }
-            } else if (type === 'image' && wmAuxLogo) {
-                const lw = wmAuxLogo.width * 0.5, lh = wmAuxLogo.height * 0.5;
-                let x = canvas.width - lw - 30, y = canvas.height - lh - 30;
-                if (position === 'center') { x = (canvas.width - lw)/2; y = (canvas.height - lh)/2; }
-                ctx.drawImage(wmAuxLogo, x, y, lw, lh);
-            }
-            ctx.globalAlpha = 1.0;
-        }
-
-        function downloadWatermarkedImage() {
-            const canvas = document.getElementById('watermark-canvas');
-            if (!canvas || !wmBaseImage) return;
-            const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = `watermarked_ebice_${Date.now()}.png`;
-            a.click();
-            addXP(15);
-        }
-
-        // --- LUA OBFUSCATOR ---
-        function obfuscateLua() {
-            const input = document.getElementById('lua-input').value;
-            if (!input.trim()) return;
-
-            const injectJunk = document.getElementById('obf-junk').checked;
-            const useXor = document.getElementById('obf-xor').checked;
-
-            let bytes = [];
-            for (let i = 0; i < input.length; i++) {
-                bytes.push(input.charCodeAt(i) ^ (useXor ? 0x41 : 0x00));
             }
 
-            let junkHeader = injectJunk ? `local _0x9f = function() for i=1,10 do end end;\n` : '';
-            let obfuscated = `${junkHeader}local _ebice = {${bytes.join(',')}}\nlocal _str = ""\nfor i=1, #_ebice do\n    _str = _str .. string.char(_ebice[i] ${useXor ? '~ 0x41' : ''})\nend\nloadstring(_str)()`;
-
-            document.getElementById('lua-output').value = obfuscated;
-            addXP(20);
-        }
-
-        function copyToClipboard(id) {
-            const el = document.getElementById(id);
-            el.select();
-            document.execCommand('copy');
-        }
-
-        // --- ANIMATED GIF ---
-        function generateAnimatedGIF() {
-            const text = document.getElementById('gif-text-input').value || 'EBICE';
-            if (typeof gifshot === 'undefined') return;
-
-            gifshot.createGIF({
-                text: text,
-                fontSize: '16px',
-                fontColor: '#ffffff',
-                numFrames: 10,
-                interval: 0.1,
-                gifWidth: 240,
-                gifHeight: 120
-            }, function (obj) {
-                if (!obj.error) {
-                    const img = document.getElementById('gif-preview-result');
-                    img.src = obj.image;
-                    img.classList.remove('hidden');
-                    document.getElementById('gif-placeholder-text').classList.add('hidden');
-                    addXP(20);
+            if (opts.rename_params) {
+                const fnRe = /\bfunction\s+[a-zA-Z_]?[a-zA-Z0-9_]*\s*\(([^)]*)\)/g;
+                let m;
+                while ((m = fnRe.exec(src)) !== null) {
+                    m[1].split(',').map(p => p.trim()).filter(Boolean).forEach(p => {
+                        if (p !== '...' && p !== 'self' && !varMap.has(p)) {
+                            varMap.set(p, randVarName());
+                        }
+                    });
                 }
+            }
+
+            const entries = [...varMap.entries()].sort((a, b) => b[0].length - a[0].length);
+            for (const [orig, repl] of entries) {
+                const re = new RegExp('\\b' + orig.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+                src = src.replace(re, repl);
+            }
+        }
+
+        // -------- Phase 2: string obfuscation --------
+        if (opts.string_encrypt || opts.split_strings || opts.xor_strings) {
+            const strRe = /(["'])((?:\\.|(?!\1).)*)\1/g;
+            src = src.replace(strRe, (full, quote, content) => {
+                if (content.length === 0) return full;
+                if (content.includes('\\x') || content.includes('\\u')) return full;
+
+                if (opts.xor_strings) {
+                    const key = randHex(4);
+                    const xored = xorString(content, key);
+                    const b64 = toBase64(xored);
+                    return `(function() local k="${key}" local d="${b64}" local r="" for i=1,#d do local c=d:sub(i,i) local b=string.byte(c) r=r..string.char(b ~ k:byte((i-1)%#k+1)) end return r end)()`;
+                }
+                if (opts.string_encrypt) {
+                    const b64 = toBase64(content);
+                    return `(function() return "${b64}" end)()`;
+                }
+                if (opts.split_strings && content.length > 3) {
+                    const mid = Math.floor(content.length / 2);
+                    const p1 = content.slice(0, mid);
+                    const p2 = content.slice(mid);
+                    return `"${escapeLuaString(p1)}".."${escapeLuaString(p2)}"`;
+                }
+                return full;
             });
         }
 
-        // --- IMAGE CONVERTER ---
-        function previewImageToConvert(input) {
-            if (!input.files[0]) return;
-            loadedConvertFile = input.files[0];
-            document.getElementById('convert-file-name').textContent = loadedConvertFile.name;
-            document.getElementById('convert-options').classList.remove('hidden');
+        // -------- Phase 3: number obfuscation --------
+        if (opts.number_obf || opts.hex_numbers) {
+            const numRe = /(?<![\w"'.])(\d+)(?![\w"'.])/g;
+            src = src.replace(numRe, (match, numStr) => {
+                const n = parseInt(numStr, 10);
+                if (isNaN(n)) return match;
+                if (n <= 1 && Math.random() > 0.5) return match;
+
+                if (opts.hex_numbers && Math.random() > 0.5) {
+                    return '0x' + n.toString(16);
+                }
+                if (opts.number_obf) {
+                    const a = randInt(100) + 1;
+                    const b = a - n;
+                    return `(${a} - ${b})`;
+                }
+                return match;
+            });
         }
 
-        function executeImageConversion() {
-            if (!loadedConvertFile) return;
-            const format = document.getElementById('target-img-format').value;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-
-                    const ext = format.split('/')[1];
-                    const a = document.createElement('a');
-                    a.href = canvas.toDataURL(format);
-                    a.download = `converted_ebice.${ext}`;
-                    a.click();
-                    addXP(15);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(loadedConvertFile);
-        }
-
-        // --- GLITCH CANVAS ---
-        function renderGlitchCanvas() {
-            const canvas = document.getElementById('glitch-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const text = document.getElementById('glitch-text-input')?.value || "SYSTEM OVERRIDE";
-            const intensity = parseInt(document.getElementById('glitch-intensity')?.value || 8);
-
-            ctx.fillStyle = '#020617';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = 'bold 28px "Plus Jakarta Sans", sans-serif';
-            ctx.textAlign = 'center';
-
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
-            ctx.fillText(text, (canvas.width / 2) - (intensity / 2), canvas.height / 2);
-
-            ctx.fillStyle = 'rgba(6, 182, 212, 0.8)';
-            ctx.fillText(text, (canvas.width / 2) + (intensity / 2), canvas.height / 2);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-        }
-
-        function downloadGlitchCanvas() {
-            const canvas = document.getElementById('glitch-canvas');
-            const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = `glitch_ebice_${Date.now()}.png`;
-            a.click();
-            addXP(15);
-        }
-
-        // --- PIXEL ART STUDIO ---
-        const pixelCanvas = document.getElementById('pixel-canvas');
-        const pCtx = pixelCanvas ? pixelCanvas.getContext('2d') : null;
-        let isDrawing = false;
-
-        if (pixelCanvas) {
-            clearPixelCanvas();
-            pixelCanvas.addEventListener('mousedown', () => isDrawing = true);
-            pixelCanvas.addEventListener('mouseup', () => isDrawing = false);
-            pixelCanvas.addEventListener('mousemove', drawPixel);
-        }
-
-        function drawPixel(e) {
-            if (!isDrawing) return;
-            const rect = pixelCanvas.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / 16) * 16;
-            const y = Math.floor((e.clientY - rect.top) / 16) * 16;
-            const color = document.getElementById('pixel-color').value;
-            pCtx.fillStyle = color;
-            pCtx.fillRect(x, y, 16, 16);
-        }
-
-        function clearPixelCanvas() {
-            if (!pCtx) return;
-            pCtx.fillStyle = '#0f172a';
-            pCtx.fillRect(0, 0, 256, 256);
-        }
-
-        function exportPixelPNG() {
-            const a = document.createElement('a');
-            a.href = pixelCanvas.toDataURL('image/png');
-            a.download = `pixel_art_ebice_${Date.now()}.png`;
-            a.click();
-            addXP(15);
-        }
-
-        // --- GLASSMORPHISM PREVIEW ---
-        function updateGlassPreview() {
-            const card = document.getElementById('glass-demo-card');
-            if (!card) return;
-            const blur = document.getElementById('glass-blur').value;
-            const opacity = document.getElementById('glass-opacity').value / 100;
-            const border = document.getElementById('glass-border').value / 100;
-
-            card.style.background = `rgba(255, 255, 255, ${opacity})`;
-            card.style.backdropFilter = `blur(${blur}px)`;
-            card.style.borderColor = `rgba(255, 255, 255, ${border})`;
-
-            document.getElementById('glass-css-output').value = `background: rgba(255, 255, 255, ${opacity});\nbackdrop-filter: blur(${blur}px);\nborder: 1px solid rgba(255, 255, 255, ${border});`;
-        }
-
-        // --- TONE SYNTHESIZER ---
-        function playTone(type) {
-            const freq = parseFloat(document.getElementById('freq-slider').value) || 440;
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            osc.start();
-            osc.stop(ctx.currentTime + 0.5);
-        }
-
-        // --- DEV UTILS ---
-        function formatJSON() {
-            try {
-                const input = document.getElementById('dev-input').value;
-                document.getElementById('dev-output').value = JSON.stringify(JSON.parse(input), null, 2);
-            } catch(e) {
-                document.getElementById('dev-output').value = "Invalid JSON Format";
+        // -------- Phase 4: control flow --------
+        if (opts.control_flow) {
+            const lines = src.split('\n');
+            const out = [];
+            for (const line of lines) {
+                const trimmed = line.trim();
+                const skip = !trimmed || trimmed.startsWith('--') || trimmed.startsWith('local function') || trimmed.startsWith('function') || trimmed.startsWith('end');
+                if (!skip && trimmed.length > 5 && Math.random() > 0.7) {
+                    const v = randVarName();
+                    out.push(`do local ${v} = ${randInt(1000)}; if ${v} == ${randInt(1000)} then end end`);
+                }
+                out.push(line);
             }
+            src = out.join('\n');
         }
-        function encodeBase64() {
-            const input = document.getElementById('dev-input').value;
-            document.getElementById('dev-output').value = btoa(input);
-        }
-        function decodeBase64() {
-            try {
-                const input = document.getElementById('dev-input').value;
-                document.getElementById('dev-output').value = atob(input);
-            } catch(e) {
-                document.getElementById('dev-output').value = "Invalid Base64 string";
+
+        // -------- Phase 5: dead code --------
+        if (opts.dead_code) {
+            const lines = src.split('\n');
+            const out = [];
+            for (const line of lines) {
+                if (Math.random() > 0.85 && line.trim() && !line.trim().startsWith('--')) {
+                    const v = randVarName();
+                    out.push(`if ${randInt(2)} == 2 then local ${v} = "${randHex(6)}"; ${v} = nil end`);
+                }
+                out.push(line);
             }
+            src = out.join('\n');
         }
 
-        // --- UNIT UTILS ---
-        function convertPxToRem() {
-            const px = parseFloat(document.getElementById('px-val').value) || 0;
-            document.getElementById('rem-result').textContent = (px / 16).toFixed(2) + 'rem';
+        // -------- Phase 6: junk code --------
+        if (opts.junk_code) {
+            const lines = src.split('\n');
+            const out = [];
+            for (const line of lines) {
+                out.push(line);
+                if (Math.random() > 0.88 && line.trim()) {
+                    const v = randVarName();
+                    out.push(`local ${v} = ${randInt(1000)} * ${randInt(100)} + ${randInt(100)}; ${v} = nil`);
+                }
+            }
+            src = out.join('\n');
         }
 
-        function convertColor() {
-            const hex = document.getElementById('color-picker').value;
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            document.getElementById('color-rgb-result').textContent = `rgb(${r}, ${g}, ${b})`;
+        // -------- Phase 7: anti-tamper guards --------
+        if (opts.antitamper) {
+            const guardVar = randVarName();
+            const preamble =
+                `-- integrity check\n` +
+                `local ${guardVar} = function()\n` +
+                `  local ok, err = pcall(function() return true end)\n` +
+                `  if not ok then return end\n` +
+                `end\n` +
+                `${guardVar}()\n`;
+            src = preamble + src;
         }
 
-        // --- DAILY SPIN ---
-        function spinRoulette() {
-            const wheel = document.getElementById('roulette-wheel');
-            const bonus = [25, 50, 75, 100][Math.floor(Math.random() * 4)];
-            wheel.textContent = `+${bonus} XP!`;
-            addXP(bonus);
+        // -------- Phase 8: proxy functions (simple wrapper) --------
+        if (opts.proxy_functions) {
+            const wrapper = randVarName();
+            src =
+                `local ${wrapper} = function(f, ...) return f(...) end\n` +
+                src;
         }
 
-        // INIT HOOK
-        window.onload = function() {
-            lucide.createIcons();
-            loadAppState();
-            renderGlitchCanvas();
-            updateGlassPreview();
-        };
-    </script>
+        // -------- Final header --------
+        const header =
+            `-- Obfuscated with Ebice\n` +
+            `-- Layer set: ${Object.entries(opts).filter(([, v]) => v).map(([k]) => k).join(', ')}\n` +
+            `-- Generated: ${new Date().toISOString()}\n\n`;
+
+        return header + src;
+    }
+
+    // ============================================================
+    // 6. ACTIONS
+    // ============================================================
+    function runObfuscation() {
+        const code = input.value;
+        if (!code.trim()) {
+            showToast('Nothing to obfuscate — input is empty.', 'error');
+            return;
+        }
+
+        try {
+            const opts = readOptions();
+            const result = obfuscateLua(code, opts);
+            output.value = result;
+            updateMeters();
+            showToast('Code obfuscated successfully.');
+        } catch (e) {
+            console.error(e);
+            showToast('Obfuscation failed: ' + e.message, 'error');
+        }
+    }
+
+    async function copyOutput() {
+        if (!output.value.trim()) {
+            showToast('Nothing to copy.', 'error');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(output.value);
+            showToast('Output copied to clipboard.', 'info');
+        } catch (e) {
+            output.select();
+            document.execCommand('copy');
+            showToast('Output copied.', 'info');
+        }
+    }
+
+    function clearAll() {
+        input.value = '';
+        output.value = '';
+        updateMeters();
+        showToast('Cleared.', 'info');
+        input.focus();
+    }
+
+    function loadSample() {
+        input.value =
+`-- Sample Roblox Lua script
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function greet(name)
+    print("Hello, " .. name .. "!")
+end
+
+local coins = 100
+local level = 5
+
+greet(player.Name)
+print("Coins:", coins, "Level:", level)
+
+for i = 1, 3 do
+    print("Tick " .. i)
+end
+
+if coins > 50 then
+    print("Rich player detected")
+else
+    print("Keep grinding")
+end
+`;
+        updateMeters();
+        showToast('Sample script loaded.', 'info');
+    }
+
+    // ============================================================
+    // 7. EVENT BINDINGS
+    // ============================================================
+    function bind() {
+        $('#btn-run').addEventListener('click', runObfuscation);
+        $('#btn-copy').addEventListener('click', copyOutput);
+        $('#btn-clear').addEventListener('click', clearAll);
+        $('#btn-sample').addEventListener('click', loadSample);
+
+        input.addEventListener('input', updateMeters);
+        output.addEventListener('input', updateMeters);
+
+        // Ctrl/Cmd + Enter to obfuscate
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runObfuscation();
+            }
+        });
+    }
+
+    // ============================================================
+    // 8. ADSENSE BOOTSTRAP
+    // ============================================================
+    function initAdsense() {
+        try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+            // Silently ignore — AdSense may not be loaded in this environment
+        }
+    }
+
+    // ============================================================
+    // 9. INIT
+    // ============================================================
+    buildOptions();
+    bind();
+    updateMeters();
+    initAdsense();
+
+    // Push ad requests after the script loads (in case the async script
+    // finishes after our synchronous init)
+    window.addEventListener('load', initAdsense);
+})();
+</script>
 </body>
 </html>
