@@ -23,7 +23,10 @@
     allowPath: [                                  // exact host + path prefix, for Pages previews
       { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
     ],
-    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev']
+    // Sandboxes and deploy previews: the guard stands down here so you can always
+    // debug your own copy. Trim this list - every entry is also a hole a copycat
+    // could hide in (SECURITY.md, "Limits").
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev', 'e2b.app', 'codesandbox.io', 'stackblitz.io']
   };
   var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
   function suffix(list, h) {

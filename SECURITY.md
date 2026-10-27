@@ -46,6 +46,11 @@ something hostile in a visitor's browser, (4) the repo itself being abused.
   since 1 Mar 2026). A DIY banner is not certified and pushes you to limited
   ads — do §3 item 2 instead.
 
+* **Blocking every non-allowlisted host, unconditionally.** The `preview` list in
+  the bootstrap (localhost, Vercel/Netlify/Pages previews, sandbox hosts) is there so
+  you can always open and debug your own copy. Every entry in it is also a hole a
+  copycat can hide in — trim it to the hosts you actually use.
+
 ## 3. Owner checklist (outside the repo, biggest wins first)
 
 1. **Enforce HTTPS.** `gh api -X PUT /repos/justgratis2-dotcom/ol-/pages -f https_enforced=true`
