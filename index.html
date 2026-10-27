@@ -1,1134 +1,664 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#07080b">
-    <meta name="google-adsense-account" content="ca-pub-7924204418079811">
-    <title>Ebice — Roblox Lua Obfuscator</title>
-
-    <meta name="description" content="Ebice — modern multi-layer Lua obfuscator for Roblox. Rename identifiers, encrypt strings, flatten control flow.">
-    <meta property="og:title" content="Ebice — Roblox Lua Obfuscator">
-    <meta property="og:description" content="Multi-layer Lua obfuscator for Roblox scripts: renombrado de identificadores, cifrado de strings y control flow flattening.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ebice.site/">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
-
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811"
-            crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5572719703751336"
-            crossorigin="anonymous"></script>
-
-    <style>
-        /* ===== RESET & TOKENS ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-0: #07080b;
-            --bg-1: #0d0f14;
-            --bg-2: #12151c;
-            --bg-3: #191d26;
-            --line: #232833;
-            --line-soft: #1a1e27;
-            --text-0: #f2f5fb;
-            --text-1: #a8b1c4;
-            --text-2: #616b80;
-            --accent: #6d5cff;
-            --accent-2: #22d3ee;
-            --accent-soft: rgba(109, 92, 255, 0.12);
-            --ok: #2dd4a7;
-            --err: #f0455e;
-            --radius-lg: 20px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
-            --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, monospace;
-            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-        }
-
-        html, body { height: 100%; }
-
-        body {
-            background: var(--bg-0);
-            background-image:
-                radial-gradient(900px 500px at 15% -10%, rgba(109, 92, 255, 0.10), transparent 60%),
-                radial-gradient(800px 480px at 95% 10%, rgba(34, 211, 238, 0.06), transparent 55%);
-            background-attachment: fixed;
-            color: var(--text-0);
-            font-family: var(--sans);
-            font-size: 15px;
-            line-height: 1.55;
-            -webkit-font-smoothing: antialiased;
-            padding: 28px 20px 48px;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* ===== SHELL ===== */
-        .shell {
-            width: 100%;
-            max-width: 1320px;
-        }
-
-        /* ===== TOP BAR ===== */
-        .topbar {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            margin-bottom: 22px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0));
-            border: 1px solid var(--line-soft);
-            border-radius: var(--radius-lg);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            flex-wrap: wrap;
-        }
-
-        .brand { display: flex; align-items: center; gap: 12px; }
-
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: linear-gradient(140deg, var(--accent), #4c3fd6 55%, #2b2a66);
-            display: grid;
-            place-items: center;
-            font-weight: 800;
-            font-size: 17px;
-            letter-spacing: -0.5px;
-            color: #fff;
-            box-shadow: 0 6px 20px -6px rgba(109, 92, 255, 0.7), inset 0 1px 0 rgba(255,255,255,0.2);
-        }
-
-        .brand-name { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
-        .brand-sub {
-            font-size: 11.5px;
-            color: var(--text-2);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-top: 1px;
-        }
-
-        .topbar-spacer { flex: 1; }
-
-        .engine-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 13px;
-            border-radius: 999px;
-            background: var(--bg-2);
-            border: 1px solid var(--line);
-            font-size: 12.5px;
-            font-weight: 500;
-            color: var(--text-1);
-            font-family: var(--mono);
-        }
-
-        .dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--ok);
-            box-shadow: 0 0 0 3px rgba(45, 212, 167, 0.15);
-            animation: blink 2.4s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.35; }
-        }
-
-        /* ===== AD SLOT ===== */
-        .ad-slot {
-            margin-bottom: 18px;
-            min-height: 90px;
-            border: 1px solid var(--line-soft);
-            border-radius: var(--radius-md);
-            background: var(--bg-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .ad-slot .ad-label {
-            font-size: 10.5px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-2);
-            margin-right: 12px;
-            font-weight: 600;
-        }
-
-        /* ===== EDITOR GRID ===== */
-        .editor-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 18px;
-        }
-
-        @media (max-width: 880px) {
-            .editor-grid { grid-template-columns: 1fr; }
-        }
-
-        .pane {
-            background: var(--bg-1);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: border-color 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .pane:focus-within {
-            border-color: rgba(109, 92, 255, 0.55);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-
-        .pane-head {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 11px 16px;
-            border-bottom: 1px solid var(--line-soft);
-            background: rgba(0, 0, 0, 0.18);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--text-2);
-        }
-
-        .pane-head .pane-label { color: var(--text-1); }
-
-        .pane-head .filename {
-            font-family: var(--mono);
-            font-size: 11.5px;
-            color: var(--text-2);
-            text-transform: none;
-            letter-spacing: 0;
-            background: var(--bg-3);
-            padding: 2px 8px;
-            border-radius: 5px;
-            border: 1px solid var(--line-soft);
-        }
-
-        .pane-head .spacer { flex: 1; }
-
-        .pane-head .meter {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--text-2);
-            letter-spacing: 0;
-            text-transform: none;
-        }
-
-        .pane-body { flex: 1; display: flex; }
-
-        textarea {
-            flex: 1;
-            width: 100%;
-            min-height: 268px;
-            background: transparent;
-            border: 0;
-            outline: none;
-            resize: vertical;
-            padding: 16px 18px;
-            color: var(--text-0);
-            font-family: var(--mono);
-            font-size: 13px;
-            line-height: 1.65;
-            tab-size: 4;
-            caret-color: var(--accent);
-        }
-
-        textarea::placeholder { color: #3c4352; font-style: normal; }
-
-        textarea.output {
-            color: #b9c4dc;
-            font-size: 12.5px;
-            word-break: break-word;
-        }
-
-        /* ===== OPTIONS PANEL ===== */
-        .options-panel {
-            background: var(--bg-1);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-lg);
-            padding: 18px 20px 20px;
-            margin-bottom: 16px;
-        }
-
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-1);
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .panel-title::before {
-            content: "";
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
-        }
-
-        .panel-title .hint {
-            margin-left: auto;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0;
-            text-transform: none;
-            color: var(--text-2);
-        }
-
-        .preset-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .chip {
-            font-family: var(--sans);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            color: var(--text-1);
-            background: var(--bg-2);
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            padding: 6px 13px;
-            cursor: pointer;
-            transition: all 0.14s ease;
-        }
-
-        .chip:hover {
-            background: var(--bg-3);
-            color: var(--text-0);
-            border-color: #313a4b;
-        }
-
-        .chip.ghost {
-            background: transparent;
-            border-style: dashed;
-            color: var(--text-2);
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-            gap: 6px 14px;
-        }
-
-        .opt {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 7px 9px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background 0.14s ease;
-            user-select: none;
-        }
-
-        .opt:hover { background: rgba(255, 255, 255, 0.028); }
-
-        .opt input {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 17px;
-            height: 17px;
-            margin-top: 2px;
-            border-radius: 5px;
-            border: 1.5px solid #323a49;
-            background: var(--bg-2);
-            cursor: pointer;
-            flex-shrink: 0;
-            position: relative;
-            transition: all 0.14s ease;
-        }
-
-        .opt input:checked {
-            background: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(109, 92, 255, 0.45);
-        }
-
-        .opt input:checked::after {
-            content: "";
-            position: absolute;
-            left: 4.5px;
-            top: 1.5px;
-            width: 4px;
-            height: 8px;
-            border: solid #fff;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        .opt-text { display: flex; flex-direction: column; gap: 1px; }
-
-        .opt-label {
-            font-size: 13px;
-            color: var(--text-0);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            flex-wrap: wrap;
-        }
-
-        .opt-tag {
-            font-family: var(--mono);
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--accent);
-            background: var(--accent-soft);
-            border: 1px solid rgba(109, 92, 255, 0.22);
-            padding: 0 5px;
-            border-radius: 4px;
-            letter-spacing: 0.02em;
-        }
-
-        .opt-desc { font-size: 11.5px; color: var(--text-2); }
-
-        /* ===== ACTION BAR ===== */
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: var(--radius-sm);
-            padding: 10px 18px;
-            font-family: var(--sans);
-            font-size: 13.5px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid var(--line);
-            background: var(--bg-2);
-            color: var(--text-1);
-            transition: all 0.16s ease;
-            white-space: nowrap;
-            letter-spacing: 0.01em;
-        }
-
-        .btn:hover {
-            background: var(--bg-3);
-            color: var(--text-0);
-            border-color: #313a4b;
-        }
-
-        .btn:active { transform: translateY(1px); }
-
-        .btn:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: linear-gradient(180deg, #7a6bff, var(--accent));
-            border-color: transparent;
-            color: #fff;
-            box-shadow: 0 8px 24px -8px rgba(109, 92, 255, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-            padding: 11px 24px;
-            font-size: 14px;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(180deg, #8a7dff, #7a6bff);
-            color: #fff;
-            box-shadow: 0 10px 30px -8px rgba(109, 92, 255, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        }
-
-        .btn-accent-outline {
-            background: transparent;
-            border-color: rgba(109, 92, 255, 0.4);
-            color: #b3a9ff;
-        }
-
-        .btn-accent-outline:hover {
-            background: var(--accent-soft);
-            border-color: var(--accent);
-            color: #cfc8ff;
-        }
-
-        .btn .ico { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.9; }
-
-        .actions-spacer { flex: 1; }
-
-        .stats {
-            display: flex;
-            gap: 14px;
-            font-family: var(--mono);
-            font-size: 11.5px;
-            color: var(--text-2);
-            background: var(--bg-1);
-            border: 1px solid var(--line-soft);
-            padding: 7px 14px;
-            border-radius: 999px;
-        }
-
-        .stats b { color: var(--accent); font-weight: 600; }
-
-        /* ===== FOOTER ===== */
-        .foot {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px 20px;
-            justify-content: center;
-            margin-top: 22px;
-            font-size: 11.5px;
-            color: var(--text-2);
-            letter-spacing: 0.02em;
-        }
-
-        .foot span { display: inline-flex; align-items: center; gap: 6px; }
-
-        .foot .sep {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--text-2);
-            opacity: 0.5;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 18px;
-            border-radius: var(--radius-md);
-            background: var(--bg-2);
-            border: 1px solid var(--line);
-            border-left: 3px solid var(--accent);
-            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7);
-            font-size: 13px;
-            color: var(--text-0);
-            opacity: 0;
-            transform: translateY(14px);
-            pointer-events: none;
-            transition: opacity 0.24s ease, transform 0.24s ease;
-            z-index: 999;
-            max-width: 340px;
-        }
-
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.error { border-left-color: var(--err); }
-        .toast.info { border-left-color: var(--accent-2); }
-
-        .toast-indicator {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            flex-shrink: 0;
-        }
-
-        .toast.error .toast-indicator { background: var(--err); }
-        .toast.info .toast-indicator { background: var(--accent-2); }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 9px; height: 9px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb {
-            background: #262c38;
-            border-radius: 999px;
-            border: 2px solid var(--bg-1);
-        }
-        ::-webkit-scrollbar-thumb:hover { background: #333b4b; }
-
-        @media (max-width: 520px) {
-            .stats { display: none; }
-            .btn { padding: 10px 14px; font-size: 13px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07080b">
+<meta name="google-adsense-account" content="ca-pub-7924204418079811">
+<title>Ebice — Roblox Lua Obfuscator</title>
+<meta name="description" content="Ebice — modern multi-layer Lua obfuscator for Roblox. Rename identifiers, encrypt strings, obfuscate numbers and inject opaque control flow.">
+<meta property="og:title" content="Ebice — Roblox Lua Obfuscator">
+<meta property="og:description" content="Multi-layer Lua obfuscator for Roblox scripts: identifier renaming, string encryption and control-flow noise.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ebice.site/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811" crossorigin="anonymous"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-0:#07080b;--bg-1:#0d0f14;--bg-2:#12151c;--bg-3:#191d26;
+  --line:#232833;--line-soft:#1a1e27;
+  --text-0:#f2f5fb;--text-1:#a8b1c4;--text-2:#6b7589;
+  --accent:#6d5cff;--accent-2:#22d3ee;--accent-soft:rgba(109,92,255,.13);
+  --ok:#2dd4a7;--err:#f0455e;
+  --r-lg:18px;--r-md:12px;--r-sm:8px;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --sans:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;background:var(--bg-0);color:var(--text-0);font-family:var(--sans);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding:28px 20px 48px;display:flex;justify-content:center;position:relative;overflow-x:hidden;
+}
+
+/* ===== animated background ===== */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 22s ease-in-out infinite alternate}
+.orb.a{width:560px;height:560px;left:-140px;top:-180px;background:rgba(109,92,255,.35)}
+.orb.b{width:480px;height:480px;right:-120px;top:10%;background:rgba(34,211,238,.18);animation-duration:28s;animation-delay:-8s}
+.orb.c{width:420px;height:420px;left:35%;bottom:-220px;background:rgba(109,92,255,.2);animation-duration:34s;animation-delay:-14s}
+@keyframes drift{to{transform:translate(70px,50px) scale(1.12)}}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);background-size:56px 56px;opacity:.35;mask-image:radial-gradient(ellipse at 50% 0,#000 10%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000 10%,transparent 70%)}
+
+.shell{width:100%;max-width:1320px;position:relative;z-index:1}
+
+/* one orchestrated entrance, on load only */
+.rise{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ===== top bar ===== */
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:22px;background:rgba(18,21,28,.55);border:1px solid var(--line-soft);border-radius:var(--r-lg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(140deg,var(--accent),#4c3fd6 55%,#2b2a66);display:grid;place-items:center;font-weight:700;font-size:19px;color:#fff;box-shadow:0 6px 20px -6px rgba(109,92,255,.7),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .3s}
+.brand:hover .brand-mark{transform:rotate(-8deg) scale(1.06)}
+.brand-name{font-size:19px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.brand-sub{font-size:12px;color:var(--text-2);margin-top:2px}
+.topbar-spacer{flex:1}
+.engine-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line);font-size:12px;color:var(--text-1);font-family:var(--mono)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(45,212,167,.15);animation:blink 2.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* ===== ad slots (hidden when unfilled) ===== */
+.ad-slot{margin-bottom:18px;min-height:90px;border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--bg-1);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ad-slot:has(ins[data-ad-status="unfilled"]){display:none}
+ins.adsbygoogle[data-ad-status="unfilled"]{display:none!important}
+.ad-label{font-size:11px;color:var(--text-2);margin-right:12px;font-weight:600}
+
+/* ===== editor ===== */
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:880px){.editor-grid{grid-template-columns:1fr}}
+.pane{position:relative;background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s}
+.pane:focus-within{border-color:rgba(109,92,255,.55);box-shadow:0 0 0 3px var(--accent-soft)}
+.pane.drop{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(34,211,238,.15)}
+.pane-head{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line-soft);background:rgba(0,0,0,.18);font-size:13px;font-weight:600;color:var(--text-1);position:relative}
+.filename{font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--text-2);background:var(--bg-3);padding:2px 8px;border-radius:5px;border:1px solid var(--line-soft)}
+.spacer{flex:1}
+.meter{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--text-2)}
+.pane-body{flex:1;display:flex}
+textarea{flex:1;width:100%;min-height:290px;background:transparent;border:0;outline:none;resize:vertical;padding:16px 18px;color:var(--text-0);font-family:var(--mono);font-size:13px;line-height:1.65;tab-size:4;caret-color:var(--accent)}
+textarea::placeholder{color:#3c4352}
+textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
+
+/* progress bar + reveal sweep on output pane */
+.bar{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.pane.busy .bar{animation:load .55s ease-out forwards}
+@keyframes load{to{width:100%}}
+.pane.flash::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(109,92,255,.2) 50%,transparent 70%);transform:translateX(-100%);animation:sweep .8s ease-out forwards;pointer-events:none}
+@keyframes sweep{to{transform:translateX(100%)}}
+
+/* ===== options ===== */
+.options-panel{background:rgba(13,15,20,.85);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px 20px;margin-bottom:16px}
+.panel-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.panel-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px}
+.panel-title::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.counter{font-family:var(--mono);font-size:11.5px;color:var(--text-1);background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.counter b{color:var(--accent-2);font-weight:500;display:inline-block;transition:transform .2s}
+.counter b.pop{transform:scale(1.35)}
+.presets{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--bg-2);border:1px solid var(--line);border-radius:999px;flex-wrap:wrap}
+.chip{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--text-2);background:transparent;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;transition:background .15s,color .15s}
+.chip:hover{color:var(--text-0)}
+.chip.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px -4px rgba(109,92,255,.8)}
+.chip:focus-visible,.btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.group{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:12px 12px 8px}
+.group-title{font-size:12.5px;font-weight:600;color:var(--text-1);padding:0 6px 8px;margin-bottom:4px;border-bottom:1px solid var(--line-soft)}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:8px 6px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s;user-select:none}
+.opt:hover{background:rgba(255,255,255,.035)}
+.opt input{appearance:none;-webkit-appearance:none;width:17px;height:17px;margin-top:2px;border-radius:5px;border:1.5px solid #323a49;background:var(--bg-1);cursor:pointer;flex-shrink:0;position:relative;transition:background .15s,border-color .15s,box-shadow .15s,transform .15s}
+.opt input:active{transform:scale(.85)}
+.opt input:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.opt input:checked{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(109,92,255,.45)}
+.opt input:checked::after{content:"";position:absolute;left:4.5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.opt-text{display:flex;flex-direction:column}
+.opt-label{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.opt-tag{font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(109,92,255,.22);padding:0 5px;border-radius:4px}
+.opt-desc{font-size:12px;color:var(--text-2)}
+
+/* ===== actions ===== */
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-sm);padding:10px 18px;font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--bg-2);color:var(--text-1);transition:background .16s,color .16s,border-color .16s,transform .16s,box-shadow .16s;white-space:nowrap}
+.btn:hover:not(:disabled){background:var(--bg-3);color:var(--text-0);border-color:#313a4b;transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(180deg,#7a6bff,var(--accent));border-color:transparent;color:#fff;box-shadow:0 8px 24px -8px rgba(109,92,255,.65),inset 0 1px 0 rgba(255,255,255,.22);padding:11px 26px;font-size:14.5px;position:relative;overflow:hidden}
+.btn-primary:hover:not(:disabled){background:linear-gradient(180deg,#8a7dff,#7a6bff);color:#fff;box-shadow:0 12px 32px -8px rgba(109,92,255,.9),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary.busy .ico{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-accent-outline{background:transparent;border-color:rgba(109,92,255,.4);color:#b3a9ff}
+.btn-accent-outline:hover:not(:disabled){background:var(--accent-soft);border-color:var(--accent);color:#cfc8ff}
+.btn .ico{width:15px;height:15px;flex-shrink:0}
+.actions-spacer{flex:1}
+.kbd{font-family:var(--mono);font-size:10.5px;color:var(--text-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--bg-1)}
+.stats{display:flex;gap:14px;font-family:var(--mono);font-size:11.5px;color:var(--text-2);background:var(--bg-1);border:1px solid var(--line-soft);padding:7px 14px;border-radius:999px}
+.stats b{color:var(--accent);font-weight:500}
+
+/* ===== footer ===== */
+.foot{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:center;margin-top:24px;font-size:12px;color:var(--text-2)}
+.foot span{display:inline-flex;align-items:center;gap:6px}
+.foot .sep{width:3px;height:3px;border-radius:50%;background:var(--text-2);opacity:.5}
+
+/* ===== toast ===== */
+.toast{position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:var(--r-md);background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--accent);box-shadow:0 20px 50px -12px rgba(0,0,0,.7);font-size:13px;opacity:0;transform:translateY(14px) scale(.98);pointer-events:none;transition:opacity .25s,transform .25s;z-index:999;max-width:340px}
+.toast.show{opacity:1;transform:none}
+.toast.error{border-left-color:var(--err)}
+.toast.info{border-left-color:var(--accent-2)}
+.toast-indicator{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.toast.error .toast-indicator{background:var(--err)}
+.toast.info .toast-indicator{background:var(--accent-2)}
+
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#262c38;border-radius:999px;border:2px solid var(--bg-1)}
+::-webkit-scrollbar-thumb:hover{background:#333b4b}
+
+@media(max-width:520px){.stats{display:none}.btn{padding:10px 14px;font-size:13px}.presets{margin-left:0}.kbd{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rise{opacity:1;transform:none}}
+</style>
 </head>
 <body>
 
+<div class="bg" aria-hidden="true"><div class="grid-bg"></div><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+
 <div class="shell">
 
-    <!-- TOP BAR -->
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-mark">E</div>
-            <div>
-                <div class="brand-name">Ebice</div>
-                <div class="brand-sub">Lua Obfuscator</div>
-            </div>
-        </div>
-        <div class="topbar-spacer"></div>
-        <div class="engine-pill">
-            <span class="dot"></span>
-            Engine ready &middot; v2.5.0
-        </div>
-    </header>
-
-    <!-- AD SLOT (top) -->
-    <div class="ad-slot" aria-label="Advertisement">
-        <span class="ad-label">Ad</span>
-        <ins class="adsbygoogle"
-             style="display:block; width:100%; min-height:90px;"
-             data-ad-client="ca-pub-7924204418079811"
-             data-ad-slot="1234567890"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+  <header class="topbar rise" style="--i:0">
+    <div class="brand">
+      <div class="brand-mark">E</div>
+      <div>
+        <div class="brand-name">Ebice</div>
+        <div class="brand-sub">Roblox Lua obfuscator</div>
+      </div>
     </div>
+    <div class="topbar-spacer"></div>
+    <div class="engine-pill"><span class="dot"></span>Engine ready &middot; v2.6.0</div>
+  </header>
 
-    <!-- EDITOR -->
-    <main class="editor-grid">
-        <section class="pane">
-            <div class="pane-head">
-                <span class="pane-label">Source</span>
-                <span class="filename">script.lua</span>
-                <span class="spacer"></span>
-                <span class="meter" id="input-meter">0 lines</span>
-            </div>
-            <div class="pane-body">
-                <textarea id="input-code" placeholder="-- Paste your Roblox Lua code here&#10;-- Example:&#10;print(&quot;Hello Roblox&quot;)&#10;local coins = 100&#10;game.Players.LocalPlayer..." spellcheck="false"></textarea>
-            </div>
-        </section>
+  <div class="ad-slot rise" style="--i:1" aria-label="Advertisement">
+    <span class="ad-label">Ad</span>
+    <!-- Replace data-ad-slot with your real AdSense ad unit ID -->
+    <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px;" data-ad-client="ca-pub-7924204418079811" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
 
-        <section class="pane">
-            <div class="pane-head">
-                <span class="pane-label">Obfuscated</span>
-                <span class="filename">protected.lua</span>
-                <span class="spacer"></span>
-                <span class="meter" id="output-meter">0 lines</span>
-            </div>
-            <div class="pane-body">
-                <textarea id="output-code" class="output" placeholder="-- The obfuscated output will appear here..." readonly spellcheck="false"></textarea>
-            </div>
-        </section>
-    </main>
-
-    <!-- OPTIONS -->
-    <section class="options-panel">
-        <div class="panel-title">
-            Obfuscation layers
-            <span class="hint">Select every layer you want to apply</span>
-        </div>
-        <div class="preset-row">
-            <span class="chip" data-preset="light">Ligero</span>
-            <span class="chip" data-preset="balanced">Equilibrado</span>
-            <span class="chip" data-preset="heavy">Máximo</span>
-            <span class="chip ghost" data-preset="all">Todo</span>
-            <span class="chip ghost" data-preset="none">Nada</span>
-        </div>
-        <div class="options-grid" id="options-grid"></div>
+  <main class="editor-grid">
+    <section class="pane rise" style="--i:2" id="pane-in">
+      <div class="pane-head">
+        <span>Source</span><span class="filename">script.lua</span><span class="spacer"></span>
+        <span class="meter" id="input-meter">0 lines</span>
+      </div>
+      <div class="pane-body">
+        <textarea id="input-code" aria-label="Lua source code" placeholder="-- Paste your Roblox Lua code here (or drop a .lua file)&#10;-- Example:&#10;print(&quot;Hello Roblox&quot;)&#10;local coins = 100&#10;game.Players.LocalPlayer..." spellcheck="false"></textarea>
+      </div>
     </section>
 
-    <!-- ACTIONS -->
-    <div class="actions">
-        <button class="btn btn-primary" id="btn-run">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Obfuscate
-        </button>
-        <button class="btn btn-accent-outline" id="btn-copy">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy output
-        </button>
-        <button class="btn" id="btn-download">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-            Download
-        </button>
-        <button class="btn" id="btn-clear">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            Clear
-        </button>
-        <button class="btn" id="btn-sample">
-            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
-            Load sample
-        </button>
-        <div class="actions-spacer"></div>
-        <div class="stats">
-            <span>in <b id="stat-in">0 B</b></span>
-            <span>out <b id="stat-out">0 B</b></span>
-            <span>ratio <b id="stat-ratio">&mdash;</b></span>
-        </div>
-    </div>
+    <section class="pane rise" style="--i:3" id="pane-out">
+      <div class="pane-head">
+        <span>Obfuscated</span><span class="filename">protected.lua</span><span class="spacer"></span>
+        <span class="meter" id="output-meter">0 lines</span>
+        <span class="bar"></span>
+      </div>
+      <div class="pane-body">
+        <textarea id="output-code" class="output" aria-label="Obfuscated output" placeholder="-- The obfuscated output will appear here..." readonly spellcheck="false"></textarea>
+      </div>
+    </section>
+  </main>
 
-    <!-- AD SLOT (bottom) -->
-    <div class="ad-slot" aria-label="Advertisement" style="margin-top:22px;">
-        <span class="ad-label">Ad</span>
-        <ins class="adsbygoogle"
-             style="display:block; width:100%; min-height:90px;"
-             data-ad-client="ca-pub-7924204418079811"
-             data-ad-slot="9876543210"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+  <section class="options-panel rise" style="--i:4">
+    <div class="panel-head">
+      <div class="panel-title">Obfuscation layers</div>
+      <span class="counter"><b id="count-on">0</b> / <span id="count-all">0</span> active</span>
+      <div class="presets" role="group" aria-label="Presets">
+        <button class="chip" data-preset="light">Light</button>
+        <button class="chip" data-preset="balanced">Balanced</button>
+        <button class="chip" data-preset="heavy">Maximum</button>
+        <button class="chip" data-preset="none">None</button>
+      </div>
     </div>
+    <div class="groups" id="options-grid"></div>
+  </section>
 
-    <!-- FOOTER -->
-    <footer class="foot">
-        <span>Multi-layer obfuscation</span>
-        <span class="sep"></span>
-        <span>Randomized identifiers</span>
-        <span class="sep"></span>
-        <span>String encryption</span>
-        <span class="sep"></span>
-        <span>Control flow flattening</span>
-        <span class="sep"></span>
-        <span>Lua 5.1 &middot; Roblox compatible</span>
-    </footer>
+  <div class="actions rise" style="--i:5">
+    <button class="btn btn-primary" id="btn-run">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span id="run-label">Obfuscate</span>
+    </button>
+    <button class="btn btn-accent-outline" id="btn-copy">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy output
+    </button>
+    <button class="btn" id="btn-download">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      Download
+    </button>
+    <button class="btn" id="btn-sample">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>
+      Load sample
+    </button>
+    <button class="btn" id="btn-clear">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      Clear
+    </button>
+    <span class="kbd">Ctrl + Enter</span>
+    <div class="actions-spacer"></div>
+    <div class="stats">
+      <span>in <b id="stat-in">0 B</b></span>
+      <span>out <b id="stat-out">0 B</b></span>
+      <span>ratio <b id="stat-ratio">&mdash;</b></span>
+    </div>
+  </div>
+
+  <div class="ad-slot" style="margin-top:22px" aria-label="Advertisement">
+    <span class="ad-label">Ad</span>
+    <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px;" data-ad-client="ca-pub-7924204418079811" data-ad-slot="9876543210" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+  <footer class="foot">
+    <span>Multi-layer obfuscation</span><span class="sep"></span>
+    <span>Randomized identifiers</span><span class="sep"></span>
+    <span>String encryption</span><span class="sep"></span>
+    <span>Opaque control flow</span><span class="sep"></span>
+    <span>Lua 5.1 &middot; Roblox compatible</span>
+  </footer>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite">
-    <span class="toast-indicator"></span>
-    <span id="toast-msg">Done</span>
+  <span class="toast-indicator"></span><span id="toast-msg">Done</span>
 </div>
 
 <script>
 (function () {
-    'use strict';
+'use strict';
 
-    // ============================================================
-    // 1. OPTION DEFINITIONS
-    // ============================================================
-    const OPTIONS = [
-        { id: 'rename_locals',   label: 'Rename locals',       tag: 'var',   desc: 'Random names for local variables',       on: true },
-        { id: 'rename_params',   label: 'Rename parameters',   tag: 'param', desc: 'Scramble function arguments',            on: true },
-        { id: 'string_encrypt',  label: 'Encrypt strings',     tag: 'str',   desc: 'Base64-encoded string literals',         on: true },
-        { id: 'number_obf',      label: 'Obfuscate numbers',   tag: 'num',   desc: 'Arithmetic equivalent expressions',      on: true },
-        { id: 'control_flow',    label: 'Control flow',        tag: 'cfg',   desc: 'Inject opaque predicate jumps',          on: true },
-        { id: 'dead_code',       label: 'Dead code',           tag: 'dead',  desc: 'Insert unreachable blocks',              on: true },
-        { id: 'junk_code',       label: 'Junk code',           tag: 'junk',  desc: 'No-op operations injection',             on: false },
-        { id: 'split_strings',   label: 'Split strings',       tag: 'split', desc: 'Fragment literals into concatenation',   on: true },
-        { id: 'xor_strings',     label: 'XOR strings',         tag: 'xor',   desc: 'XOR-encoded literals at runtime',        on: true },
-        { id: 'proxy_functions', label: 'Proxy functions',     tag: 'proxy', desc: 'Wrap calls in accessor functions',       on: false },
-        { id: 'antitamper',      label: 'Anti-tamper guards',  tag: 'guard', desc: 'Fake integrity checks',                  on: false },
-        { id: 'hex_numbers',     label: 'Hex literals',        tag: 'hex',   desc: 'Render integers as hex',                 on: true }
-    ];
+// ============================================================
+// 1. OPTIONS
+// ============================================================
+const GROUPS = [
+  { title: 'Naming', items: [
+    { id: 'rename_locals', label: 'Rename locals', tag: 'var', desc: 'Random names for local variables', on: true },
+    { id: 'rename_params', label: 'Rename parameters', tag: 'param', desc: 'Scramble function arguments', on: true } ] },
+  { title: 'Strings', items: [
+    { id: 'string_encrypt', label: 'Encrypt strings', tag: 'str', desc: 'Base64-encoded literals, decoded at runtime', on: true },
+    { id: 'xor_strings', label: 'XOR strings', tag: 'xor', desc: 'XOR-encoded literals decoded at runtime', on: true },
+    { id: 'split_strings', label: 'Split strings', tag: 'split', desc: 'Fragment literals into concatenation', on: true } ] },
+  { title: 'Numbers', items: [
+    { id: 'number_obf', label: 'Obfuscate numbers', tag: 'num', desc: 'Arithmetic equivalent expressions', on: true },
+    { id: 'hex_numbers', label: 'Hex literals', tag: 'hex', desc: 'Render integers as hex', on: true } ] },
+  { title: 'Structure', items: [
+    { id: 'control_flow', label: 'Control flow', tag: 'cfg', desc: 'Inject opaque predicate branches', on: true },
+    { id: 'dead_code', label: 'Dead code', tag: 'dead', desc: 'Insert unreachable blocks', on: true },
+    { id: 'junk_code', label: 'Junk code', tag: 'junk', desc: 'No-op operations injection', on: false } ] },
+  { title: 'Extras', items: [
+    { id: 'proxy_functions', label: 'Proxy functions', tag: 'proxy', desc: 'Add a call-forwarding wrapper', on: false },
+    { id: 'antitamper', label: 'Anti-tamper guards', tag: 'guard', desc: 'Fake integrity checks', on: false } ] }
+];
+const OPTIONS = GROUPS.flatMap(g => g.items);
+const ALL_IDS = OPTIONS.map(o => o.id);
+const PRESETS = {
+  light: ['rename_locals', 'rename_params', 'string_encrypt'],
+  balanced: ['rename_locals', 'rename_params', 'string_encrypt', 'number_obf', 'control_flow', 'dead_code', 'split_strings', 'xor_strings', 'hex_numbers'],
+  heavy: ALL_IDS,
+  none: []
+};
 
-    const PRESETS = {
-        light:    ['rename_locals', 'rename_params', 'string_encrypt'],
-        balanced: ['rename_locals', 'rename_params', 'string_encrypt', 'number_obf', 'control_flow', 'dead_code', 'split_strings', 'xor_strings', 'hex_numbers'],
-        heavy:    OPTIONS.map(o => o.id),
-        all:      OPTIONS.map(o => o.id),
-        none:     []
-    };
+// ============================================================
+// 2. DOM
+// ============================================================
+const $ = (s) => document.querySelector(s);
+const input = $('#input-code'), output = $('#output-code');
+const inputMeter = $('#input-meter'), outputMeter = $('#output-meter');
+const statIn = $('#stat-in'), statOut = $('#stat-out'), statRatio = $('#stat-ratio');
+const toast = $('#toast'), toastMsg = $('#toast-msg');
+const paneOut = $('#pane-out'), paneIn = $('#pane-in');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let toastTimer = null, busy = false;
 
-    // ============================================================
-    // 2. DOM
-    // ============================================================
-    const $ = (s) => document.querySelector(s);
-    const input = $('#input-code');
-    const output = $('#output-code');
-    const inputMeter = $('#input-meter');
-    const outputMeter = $('#output-meter');
-    const statIn = $('#stat-in');
-    const statOut = $('#stat-out');
-    const statRatio = $('#stat-ratio');
-    const toast = $('#toast');
-    const toastMsg = $('#toast-msg');
+function showToast(msg, kind) {
+  clearTimeout(toastTimer);
+  toastMsg.textContent = msg;
+  toast.classList.remove('error', 'info');
+  if (kind === 'error' || kind === 'info') toast.classList.add(kind);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
 
-    let toastTimer = null;
+// ============================================================
+// 3. OPTIONS UI
+// ============================================================
+function buildOptions() {
+  const grid = $('#options-grid');
+  grid.innerHTML = '';
+  GROUPS.forEach(g => {
+    const box = document.createElement('div');
+    box.className = 'group';
+    box.innerHTML = '<div class="group-title">' + g.title + '</div>';
+    g.items.forEach(opt => {
+      const label = document.createElement('label');
+      label.className = 'opt';
+      label.innerHTML =
+        '<input type="checkbox" data-id="' + opt.id + '"' + (opt.on ? ' checked' : '') + '>' +
+        '<span class="opt-text"><span class="opt-label">' + opt.label + '<span class="opt-tag">' + opt.tag + '</span></span>' +
+        '<span class="opt-desc">' + opt.desc + '</span></span>';
+      box.appendChild(label);
+    });
+    grid.appendChild(box);
+  });
+  $('#count-all').textContent = OPTIONS.length;
+  grid.addEventListener('change', syncOptionsState);
+  syncOptionsState();
+}
 
-    function showToast(msg, kind) {
-        clearTimeout(toastTimer);
-        toastMsg.textContent = msg;
-        toast.classList.remove('error', 'info');
-        if (kind === 'error') toast.classList.add('error');
-        if (kind === 'info') toast.classList.add('info');
-        toast.classList.add('show');
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+function readOptions() {
+  const map = {};
+  document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => { map[cb.dataset.id] = cb.checked; });
+  return map;
+}
+
+// Updates the "x / y active" counter and highlights the matching preset.
+function syncOptionsState() {
+  const on = ALL_IDS.filter(id => readOptions()[id]);
+  const c = $('#count-on');
+  if (c.textContent !== String(on.length)) {
+    c.textContent = on.length;
+    c.classList.add('pop');
+    setTimeout(() => c.classList.remove('pop'), 180);
+  }
+  const key = on.slice().sort().join();
+  document.querySelectorAll('.chip[data-preset]').forEach(chip => {
+    chip.classList.toggle('active', PRESETS[chip.dataset.preset].slice().sort().join() === key);
+  });
+}
+
+function applyPreset(name) {
+  const set = new Set(PRESETS[name] || []);
+  document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => { cb.checked = set.has(cb.dataset.id); });
+  syncOptionsState();
+  showToast('Preset "' + name + '" applied.', 'info');
+}
+
+// ============================================================
+// 4. UTILITIES
+// ============================================================
+const HEX = '0123456789abcdef';
+const randInt = (max) => max <= 0 ? 0 : Math.floor(Math.random() * max);
+function randHex(len) { let s = ''; for (let i = 0; i < len; i++) s += HEX[randInt(16)]; return s; }
+function randVarName() {
+  const p = ['_', '__', 'l_', 'v_', 'o_', 'x_', '_0x'];
+  return p[randInt(p.length)] + randHex(6);
+}
+function escapeLuaString(str) {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+}
+const byteSize = (str) => new Blob([str]).size;
+function formatBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+const toBytes = (s) => Array.from(new TextEncoder().encode(s));
+const byteEscapes = (bytes) => bytes.map(b => '\\' + String(b).padStart(3, '0')).join('');
+function bytesToBase64(bytes) {
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+// Decodes a quoted Lua literal body. Returns null if it uses escapes we do not model.
+function unescapeLua(inner) {
+  if (/\\(?![ntr\\"'])/.test(inner)) return null;
+  return inner.replace(/\\(n|t|r|\\|"|')/g, (_, c) => ({ n: '\n', t: '\t', r: '\r' }[c] || c));
+}
+
+function setMeters() {
+  const inLines = input.value ? input.value.split('\n').length : 0;
+  const outLines = output.value ? output.value.split('\n').length : 0;
+  inputMeter.textContent = inLines + (inLines === 1 ? ' line' : ' lines');
+  outputMeter.textContent = outLines + (outLines === 1 ? ' line' : ' lines');
+  $('#btn-copy').disabled = !output.value.trim();
+  $('#btn-download').disabled = !output.value.trim();
+}
+
+function updateMeters() {
+  setMeters();
+  const i = byteSize(input.value), o = byteSize(output.value);
+  statIn.textContent = formatBytes(i);
+  statOut.textContent = formatBytes(o);
+  statRatio.innerHTML = (i > 0 && o > 0) ? (o / i).toFixed(2) + 'x' : '&mdash;';
+}
+
+// Counts the output size up for a little feedback after each run.
+function animateStats() {
+  const i = byteSize(input.value), o = byteSize(output.value);
+  statIn.textContent = formatBytes(i);
+  if (reduceMotion || !o) return updateMeters();
+  const t0 = performance.now(), dur = 600;
+  (function step(now) {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    statOut.textContent = formatBytes(Math.round(o * e));
+    statRatio.textContent = i ? ((o * e) / i).toFixed(2) + 'x' : '\u2014';
+    if (p < 1) requestAnimationFrame(step); else updateMeters();
+  })(t0);
+}
+
+// ============================================================
+// 5. OBFUSCATION ENGINE
+// ============================================================
+const RESERVED = new Set(['local','function','end','if','then','else','elseif','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','in','continue','goto']);
+
+function obfuscateLua(code, o) {
+  if (!code.trim()) return '-- [no source code]\n-- Paste Lua code in the left pane.';
+
+  const used = new Set();
+  const uniq = () => { let n; do { n = randVarName(); } while (used.has(n)); used.add(n); return n; };
+
+  // -------- Phase 0: protect strings, strip comments --------
+  // Strings become placeholders so no pass can touch their contents
+  // (e.g. renaming "Players" inside game:GetService("Players")).
+  const store = [];
+  const protRe = /--\[(=*)\[[\s\S]*?\]\1\]|--[^\n]*|\[(=*)\[[\s\S]*?\]\2\]|"(?:\\[\s\S]|[^"\\\n])*"|'(?:\\[\s\S]|[^'\\\n])*'/g;
+  let src = code.replace(protRe, (m) => {
+    if (m.startsWith('--')) return ' ';
+    store.push(m);
+    return '\u0001' + (store.length - 1) + '\u0001';
+  });
+
+  // -------- Phase 1: rename locals & params --------
+  if (o.rename_locals || o.rename_params) {
+    const map = new Map();
+    const add = (n) => { n = n.trim(); if (n && !RESERVED.has(n) && n !== 'self' && n !== '_' && n !== '...' && !map.has(n)) map.set(n, uniq()); };
+    if (o.rename_locals) {
+      for (const m of src.matchAll(/\blocal\s+function\s+([A-Za-z_]\w*)/g)) add(m[1]);
+      for (const m of src.matchAll(/\blocal\s+(?!function\b)([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)/g)) m[1].split(',').forEach(add);
+      for (const m of src.matchAll(/\bfor\s+([A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)\s*(?:=|\bin\b)/g)) m[1].split(',').forEach(add);
     }
-
-    // ============================================================
-    // 3. BUILD OPTIONS UI
-    // ============================================================
-    function buildOptions() {
-        const grid = $('#options-grid');
-        grid.innerHTML = '';
-        OPTIONS.forEach(opt => {
-            const label = document.createElement('label');
-            label.className = 'opt';
-            label.innerHTML = `
-                <input type="checkbox" data-id="${opt.id}" ${opt.on ? 'checked' : ''}>
-                <span class="opt-text">
-                    <span class="opt-label">${opt.label}<span class="opt-tag">${opt.tag}</span></span>
-                    <span class="opt-desc">${opt.desc}</span>
-                </span>
-            `;
-            grid.appendChild(label);
-        });
+    if (o.rename_params) {
+      for (const m of src.matchAll(/\bfunction\s*[\w.:]*\s*\(([^)]*)\)/g)) m[1].split(',').forEach(add);
     }
-
-    function readOptions() {
-        const map = {};
-        document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => {
-            map[cb.dataset.id] = cb.checked;
-        });
-        return map;
-    }
-
-    function applyPreset(name) {
-        const set = new Set(PRESETS[name] || []);
-        document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => {
-            cb.checked = set.has(cb.dataset.id);
-        });
-        showToast(`Preset "${name}" applicado.`, 'info');
-    }
-
-    // ============================================================
-    // 4. UTILITIES
-    // ============================================================
-    const HEX = '0123456789abcdef';
-
-    function randInt(max) {
-        if (max <= 0) return 0;
-        return Math.floor(Math.random() * max);
-    }
-
-    function randHex(len) {
-        let s = '';
-        for (let i = 0; i < len; i++) s += HEX[randInt(16)];
-        return s;
-    }
-
-    function randVarName() {
-        const prefixes = ['_', '__', 'l_', 'v_', 'o_', 'x_', '_0x'];
-        return prefixes[randInt(prefixes.length)] + randHex(6);
-    }
-
-    function toBase64(str) {
-        try {
-            return btoa(unescape(encodeURIComponent(str)));
-        } catch (e) {
-            return btoa(str.split('').map(c => c.charCodeAt(0).toString(16)).join(''));
+    if (map.size) {
+      // Mark which characters sit directly inside a { } table constructor.
+      const stack = [], inTable = new Uint8Array(src.length);
+      for (let i = 0; i < src.length; i++) {
+        const ch = src[i];
+        if ('({['.includes(ch)) stack.push(ch);
+        else if (')}]'.includes(ch)) stack.pop();
+        else inTable[i] = stack[stack.length - 1] === '{' ? 1 : 0;
+      }
+      src = src.replace(/(?<!\w)[A-Za-z_]\w*/g, (w, off, whole) => {
+        const repl = map.get(w);
+        if (!repl) return w;
+        const p1 = whole[off - 1], p2 = whole[off - 2];
+        if (p1 === '.' && p2 !== '.') return w;   // field access: obj.Name
+        if (p1 === ':' && p2 !== ':') return w;   // method call: obj:Method
+        if (inTable[off]) {                       // table key: { Name = 1 }
+          const before = whole.slice(0, off).trimEnd().slice(-1);
+          const after = whole.slice(off + w.length).trimStart();
+          if ((before === '{' || before === ',') && after[0] === '=' && after[1] !== '=') return w;
         }
+        return repl;
+      });
     }
+  }
 
-    function xorString(str, key) {
-        let out = '';
-        for (let i = 0; i < str.length; i++) {
-            out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-        }
-        return out;
+  // -------- Phase 2: number obfuscation --------
+  if (o.number_obf || o.hex_numbers) {
+    src = src.replace(/(?<![\w.\u0001])(\d+)(?![\w.\u0001])/g, (match, numStr) => {
+      const n = parseInt(numStr, 10);
+      if (isNaN(n) || !Number.isSafeInteger(n)) return match;
+      if (n <= 1 && Math.random() > 0.5) return match;
+      if (o.hex_numbers && Math.random() > 0.5) return '0x' + n.toString(16);
+      if (o.number_obf) { const a = randInt(100) + 1; return '(' + a + ' - ' + (a - n) + ')'; }
+      return match;
+    });
+  }
+
+  // -------- Phase 3: structural noise (statement boundaries only) --------
+  function inject(source, prob, gen) {
+    const lines = source.split('\n'), out = [];
+    let depth = 0, prev = '';
+    for (const line of lines) {
+      const t = line.trim();
+      const startsOk = t && !/^(end|else|elseif|until|[)}\]]|\.\.|and\b|or\b)/.test(t);
+      const prevOk = !/([,=({\[+\-*\/%^.<>~#]|\b(and|or|not|in|local|return)\b)$/.test(prev);
+      if (depth === 0 && startsOk && prevOk && Math.random() < prob) out.push(gen());
+      out.push(line);
+      depth += (line.match(/[({\[]/g) || []).length - (line.match(/[)}\]]/g) || []).length;
+      if (depth < 0) depth = 0;
+      if (t) prev = t;
     }
+    return out.join('\n');
+  }
+  if (o.control_flow) src = inject(src, .3, () => { const v = uniq(), n = randInt(1000); return 'do local ' + v + ' = ' + n + '; if ' + v + ' ~= ' + n + ' then ' + v + ' = ' + randInt(1000) + ' end end'; });
+  if (o.dead_code)    src = inject(src, .15, () => { const v = uniq(); return 'if ' + randInt(2) + ' == 2 then local ' + v + ' = "' + randHex(6) + '"; ' + v + ' = nil end'; });
+  if (o.junk_code)    src = inject(src, .12, () => { const v = uniq(); return 'do local ' + v + ' = ' + randInt(1000) + ' * ' + randInt(100) + ' + ' + randInt(100) + '; ' + v + ' = nil end'; });
 
-    function escapeLuaString(str) {
-        return str
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r');
+  // -------- Phase 4: string obfuscation + restore --------
+  const decB = uniq(), decX = uniq();
+  let needB = false, needX = false;
+
+  const needsParens = (whole, off) => {
+    const before = whole.slice(0, off).trimEnd();
+    const m = /([A-Za-z_]\w*)$/.exec(before);
+    if (m) return !RESERVED.has(m[1]);   // print"x" call syntax
+    return /[)\]]$/.test(before);
+  };
+
+  function transformString(raw) {
+    const q = raw[0];
+    if (q !== '"' && q !== "'") return raw;           // long strings stay as-is
+    const dec = unescapeLua(raw.slice(1, -1));
+    if (dec === null || !dec.length) return raw;
+    if (o.xor_strings) {
+      const key = randHex(4), bytes = toBytes(dec);
+      needX = true;
+      return decX + '("' + byteEscapes(bytes.map((b, i) => b ^ key.charCodeAt(i % key.length))) + '","' + key + '")';
     }
-
-    function byteSize(str) {
-        return new Blob([str]).size;
+    if (o.string_encrypt) {
+      needB = true;
+      return decB + '("' + bytesToBase64(toBytes(dec)) + '")';
     }
-
-    function formatBytes(n) {
-        if (n < 1024) return n + ' B';
-        if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-        return (n / (1024 * 1024)).toFixed(2) + ' MB';
+    if (o.split_strings && dec.length > 3) {
+      const mid = 1 + randInt(dec.length - 1);
+      return '("' + escapeLuaString(dec.slice(0, mid)) + '".."' + escapeLuaString(dec.slice(mid)) + '")';
     }
+    return raw;
+  }
 
-    // Protects already-quoted string literals from being touched by later
-    // passes (e.g. the number pass mangling digits inside a base64 blob).
-    function protectStrings(str) {
-        const store = [];
-        const protectedSrc = str.replace(/(["'])((?:\\.|(?!\1).)*)\1/g, (m) => {
-            store.push(m);
-            return `\u0001${store.length - 1}\u0001`;
-        });
-        return { protectedSrc, store };
+  src = src.replace(/\u0001(\d+)\u0001/g, (m, i, off, whole) => {
+    const raw = store[+i];
+    const out = transformString(raw);
+    return (out !== raw && needsParens(whole, off)) ? '(' + out + ')' : out;
+  });
+
+  // -------- Phase 5: preamble (runtime helpers, guards, proxy) --------
+  let pre = '';
+  if (needB) pre += 'local ' + decB + '=(function() local t="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" local m={} for i=1,64 do m[t:sub(i,i)]=i-1 end return function(s) local r,n,v={},0,0 for i=1,#s do local c=m[s:sub(i,i)] if c then v=v*64+c n=n+6 if n>=8 then n=n-8 local b=math.floor(v/2^n) v=v-b*2^n r[#r+1]=string.char(b) end end end return table.concat(r) end end)()\n';
+  if (needX) pre += 'local ' + decX + '=function(s,k) local r={} local n=#k for i=1,#s do r[i]=string.char(bit32.bxor(s:byte(i),k:byte((i-1)%n+1))) end return table.concat(r) end\n';
+  if (o.antitamper) {
+    const g = uniq();
+    pre += 'local ' + g + '=function() local ok=pcall(function() return true end) if not ok then return end end ' + g + '()\n';
+  }
+  if (o.proxy_functions) {
+    pre += 'local ' + uniq() + '=function(f,...) return f(...) end\n';
+  }
+
+  const header =
+    '-- Obfuscated with Ebice\n' +
+    '-- Layers: ' + (Object.entries(o).filter(([, v]) => v).map(([k]) => k).join(', ') || 'none') + '\n' +
+    '-- Generated: ' + new Date().toISOString() + '\n\n';
+
+  return header + pre + src.replace(/^\s*\n/, '');
+}
+
+// ============================================================
+// 6. ACTIONS
+// ============================================================
+function runObfuscation() {
+  if (busy) return;
+  const code = input.value;
+  if (!code.trim()) { showToast('Nothing to obfuscate — the input is empty.', 'error'); return; }
+
+  busy = true;
+  const btn = $('#btn-run'), label = $('#run-label');
+  btn.classList.add('busy'); btn.disabled = true; label.textContent = 'Obfuscating…';
+  paneOut.classList.remove('flash');
+  paneOut.classList.add('busy');
+
+  setTimeout(() => {
+    try {
+      output.value = obfuscateLua(code, readOptions());
+      setMeters();
+      animateStats();
+      paneOut.classList.add('flash');
+      showToast('Code obfuscated successfully.');
+    } catch (e) {
+      console.error(e);
+      showToast('Obfuscation failed: ' + e.message, 'error');
+    } finally {
+      busy = false;
+      btn.classList.remove('busy'); btn.disabled = false; label.textContent = 'Obfuscate';
+      paneOut.classList.remove('busy');
     }
+  }, reduceMotion ? 0 : 450);
+}
 
-    function restoreStrings(str, store) {
-        return str.replace(/\u0001(\d+)\u0001/g, (_, i) => store[Number(i)] ?? '');
-    }
+async function copyOutput() {
+  if (!output.value.trim()) { showToast('Nothing to copy.', 'error'); return; }
+  try {
+    await navigator.clipboard.writeText(output.value);
+    showToast('Output copied to clipboard.', 'info');
+  } catch (e) {
+    output.removeAttribute('readonly');
+    output.select();
+    try { document.execCommand('copy'); showToast('Output copied.', 'info'); }
+    catch (err) { showToast('Could not copy automatically — select and copy manually.', 'error'); }
+    finally { output.setAttribute('readonly', ''); }
+  }
+}
 
-    function updateMeters() {
-        const inLines = input.value ? input.value.split('\n').length : 0;
-        const outLines = output.value ? output.value.split('\n').length : 0;
-        inputMeter.textContent = inLines + (inLines === 1 ? ' line' : ' lines');
-        outputMeter.textContent = outLines + (outLines === 1 ? ' line' : ' lines');
+function downloadOutput() {
+  if (!output.value.trim()) { showToast('Nothing to download.', 'error'); return; }
+  const url = URL.createObjectURL(new Blob([output.value], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'protected.lua';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('protected.lua downloaded.', 'info');
+}
 
-        const inBytes = byteSize(input.value);
-        const outBytes = byteSize(output.value);
-        statIn.textContent = formatBytes(inBytes);
-        statOut.textContent = formatBytes(outBytes);
-        if (inBytes > 0 && outBytes > 0) {
-            statRatio.textContent = (outBytes / inBytes).toFixed(2) + 'x';
-        } else {
-            statRatio.innerHTML = '&mdash;';
-        }
+function clearAll() {
+  input.value = ''; output.value = '';
+  updateMeters();
+  showToast('Cleared.', 'info');
+  input.focus();
+}
 
-        $('#btn-copy').disabled = !output.value.trim();
-        $('#btn-download').disabled = !output.value.trim();
-    }
-
-    // ============================================================
-    // 5. OBFUSCATION ENGINE
-    // ============================================================
-    function obfuscateLua(code, opts) {
-        if (!code.trim()) {
-            return '-- [no source code]\n-- Paste Lua code in the left pane.';
-        }
-
-        let src = code;
-
-        // -------- Phase 1: rename locals & params --------
-        if (opts.rename_locals || opts.rename_params) {
-            const varMap = new Map();
-            const reserved = ['local','function','end','if','then','else','elseif','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','in'];
-
-            if (opts.rename_locals) {
-                const localRe = /\blocal\s+([a-zA-Z_][a-zA-Z0-9_]*)/g;
-                let m;
-                while ((m = localRe.exec(src)) !== null) {
-                    const name = m[1];
-                    if (!varMap.has(name) && !reserved.includes(name)) {
-                        varMap.set(name, randVarName());
-                    }
-                }
-            }
-
-            if (opts.rename_params) {
-                const fnRe = /\bfunction\s+[a-zA-Z_]?[a-zA-Z0-9_]*\s*\(([^)]*)\)/g;
-                let m;
-                while ((m = fnRe.exec(src)) !== null) {
-                    m[1].split(',').map(p => p.trim()).filter(Boolean).forEach(p => {
-                        if (p !== '...' && p !== 'self' && !varMap.has(p)) {
-                            varMap.set(p, randVarName());
-                        }
-                    });
-                }
-            }
-
-            const entries = [...varMap.entries()].sort((a, b) => b[0].length - a[0].length);
-            for (const [orig, repl] of entries) {
-                const re = new RegExp('\\b' + orig.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
-                src = src.replace(re, repl);
-            }
-        }
-
-        // -------- Phase 2: string obfuscation --------
-        if (opts.string_encrypt || opts.split_strings || opts.xor_strings) {
-            const strRe = /(["'])((?:\\.|(?!\1).)*)\1/g;
-            src = src.replace(strRe, (full, quote, content) => {
-                if (content.length === 0) return full;
-                if (content.includes('\\x') || content.includes('\\u')) return full;
-
-                if (opts.xor_strings) {
-                    const key = randHex(4);
-                    const xored = xorString(content, key);
-                    const b64 = toBase64(xored);
-                    return `(function() local k="${key}" local d="${b64}" local r="" for i=1,#d do local c=d:sub(i,i) local b=string.byte(c) r=r..string.char(b ~ k:byte((i-1)%#k+1)) end return r end)()`;
-                }
-                if (opts.string_encrypt) {
-                    const b64 = toBase64(content);
-                    return `(function() return "${b64}" end)()`;
-                }
-                if (opts.split_strings && content.length > 3) {
-                    const mid = Math.floor(content.length / 2);
-                    const p1 = content.slice(0, mid);
-                    const p2 = content.slice(mid);
-                    return `"${escapeLuaString(p1)}".."${escapeLuaString(p2)}"`;
-                }
-                return full;
-            });
-        }
-
-        // -------- Phase 3: number obfuscation --------
-        // String literals are protected first so digits inside base64/xor
-        // payloads or plain text strings are never rewritten.
-        if (opts.number_obf || opts.hex_numbers) {
-            const { protectedSrc, store } = protectStrings(src);
-            const numRe = /(?<![\w"'.])(\d+)(?![\w"'.])/g;
-            const result = protectedSrc.replace(numRe, (match, numStr) => {
-                const n = parseInt(numStr, 10);
-                if (isNaN(n)) return match;
-                if (n <= 1 && Math.random() > 0.5) return match;
-
-                if (opts.hex_numbers && Math.random() > 0.5) {
-                    return '0x' + n.toString(16);
-                }
-                if (opts.number_obf) {
-                    const a = randInt(100) + 1;
-                    const b = a - n;
-                    return `(${a} - ${b})`;
-                }
-                return match;
-            });
-            src = restoreStrings(result, store);
-        }
-
-        // -------- Phase 4: control flow --------
-        if (opts.control_flow) {
-            const lines = src.split('\n');
-            const out = [];
-            for (const line of lines) {
-                const trimmed = line.trim();
-                const skip = !trimmed || trimmed.startsWith('--') || trimmed.startsWith('local function') || trimmed.startsWith('function') || trimmed.startsWith('end');
-                if (!skip && trimmed.length > 5 && Math.random() > 0.7) {
-                    const v = randVarName();
-                    out.push(`do local ${v} = ${randInt(1000)}; if ${v} == ${randInt(1000)} then end end`);
-                }
-                out.push(line);
-            }
-            src = out.join('\n');
-        }
-
-        // -------- Phase 5: dead code --------
-        if (opts.dead_code) {
-            const lines = src.split('\n');
-            const out = [];
-            for (const line of lines) {
-                if (Math.random() > 0.85 && line.trim() && !line.trim().startsWith('--')) {
-                    const v = randVarName();
-                    out.push(`if ${randInt(2)} == 2 then local ${v} = "${randHex(6)}"; ${v} = nil end`);
-                }
-                out.push(line);
-            }
-            src = out.join('\n');
-        }
-
-        // -------- Phase 6: junk code --------
-        if (opts.junk_code) {
-            const lines = src.split('\n');
-            const out = [];
-            for (const line of lines) {
-                out.push(line);
-                if (Math.random() > 0.88 && line.trim()) {
-                    const v = randVarName();
-                    out.push(`local ${v} = ${randInt(1000)} * ${randInt(100)} + ${randInt(100)}; ${v} = nil`);
-                }
-            }
-            src = out.join('\n');
-        }
-
-        // -------- Phase 7: anti-tamper guards --------
-        if (opts.antitamper) {
-            const guardVar = randVarName();
-            const preamble =
-                `-- integrity check\n` +
-                `local ${guardVar} = function()\n` +
-                `  local ok, err = pcall(function() return true end)\n` +
-                `  if not ok then return end\n` +
-                `end\n` +
-                `${guardVar}()\n`;
-            src = preamble + src;
-        }
-
-        // -------- Phase 8: proxy functions (simple wrapper) --------
-        if (opts.proxy_functions) {
-            const wrapper = randVarName();
-            src =
-                `local ${wrapper} = function(f, ...) return f(...) end\n` +
-                src;
-        }
-
-        // -------- Final header --------
-        const header =
-            `-- Obfuscated with Ebice\n` +
-            `-- Layer set: ${Object.entries(opts).filter(([, v]) => v).map(([k]) => k).join(', ') || 'none'}\n` +
-            `-- Generated: ${new Date().toISOString()}\n\n`;
-
-        return header + src;
-    }
-
-    // ============================================================
-    // 6. ACTIONS
-    // ============================================================
-    function runObfuscation() {
-        const code = input.value;
-        if (!code.trim()) {
-            showToast('Nothing to obfuscate — input is empty.', 'error');
-            return;
-        }
-
-        try {
-            const opts = readOptions();
-            const result = obfuscateLua(code, opts);
-            output.value = result;
-            updateMeters();
-            showToast('Code obfuscated successfully.');
-        } catch (e) {
-            console.error(e);
-            showToast('Obfuscation failed: ' + e.message, 'error');
-        }
-    }
-
-    async function copyOutput() {
-        if (!output.value.trim()) {
-            showToast('Nothing to copy.', 'error');
-            return;
-        }
-        try {
-            await navigator.clipboard.writeText(output.value);
-            showToast('Output copied to clipboard.', 'info');
-        } catch (e) {
-            output.removeAttribute('readonly');
-            output.select();
-            try {
-                document.execCommand('copy');
-                showToast('Output copied.', 'info');
-            } catch (err) {
-                showToast('Could not copy automatically — select and copy manually.', 'error');
-            } finally {
-                output.setAttribute('readonly', '');
-            }
-        }
-    }
-
-    function downloadOutput() {
-        if (!output.value.trim()) {
-            showToast('Nothing to download.', 'error');
-            return;
-        }
-        const blob = new Blob([output.value], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'protected.lua';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast('protected.lua downloaded.', 'info');
-    }
-
-    function clearAll() {
-        input.value = '';
-        output.value = '';
-        updateMeters();
-        showToast('Cleared.', 'info');
-        input.focus();
-    }
-
-    function loadSample() {
-        input.value =
+function loadSample() {
+  input.value =
 `-- Sample Roblox Lua script
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -1153,61 +683,58 @@ else
     print("Keep grinding")
 end
 `;
-        updateMeters();
-        showToast('Sample script loaded.', 'info');
-    }
+  updateMeters();
+  showToast('Sample script loaded.', 'info');
+}
 
-    // ============================================================
-    // 7. EVENT BINDINGS
-    // ============================================================
-    function bind() {
-        $('#btn-run').addEventListener('click', runObfuscation);
-        $('#btn-copy').addEventListener('click', copyOutput);
-        $('#btn-download').addEventListener('click', downloadOutput);
-        $('#btn-clear').addEventListener('click', clearAll);
-        $('#btn-sample').addEventListener('click', loadSample);
+function loadFile(file) {
+  if (!file) return;
+  if (file.size > 2 * 1048576) { showToast('File is too large (2 MB max).', 'error'); return; }
+  const r = new FileReader();
+  r.onload = () => { input.value = String(r.result); updateMeters(); showToast(file.name + ' loaded.', 'info'); };
+  r.onerror = () => showToast('Could not read that file.', 'error');
+  r.readAsText(file);
+}
 
-        document.querySelectorAll('.chip[data-preset]').forEach(chip => {
-            chip.addEventListener('click', () => applyPreset(chip.dataset.preset));
-        });
+// ============================================================
+// 7. EVENTS
+// ============================================================
+function bind() {
+  $('#btn-run').addEventListener('click', runObfuscation);
+  $('#btn-copy').addEventListener('click', copyOutput);
+  $('#btn-download').addEventListener('click', downloadOutput);
+  $('#btn-clear').addEventListener('click', clearAll);
+  $('#btn-sample').addEventListener('click', loadSample);
+  document.querySelectorAll('.chip[data-preset]').forEach(chip => chip.addEventListener('click', () => applyPreset(chip.dataset.preset)));
+  input.addEventListener('input', updateMeters);
 
-        input.addEventListener('input', updateMeters);
-        output.addEventListener('input', updateMeters);
+  ['dragenter', 'dragover'].forEach(ev => paneIn.addEventListener(ev, (e) => { e.preventDefault(); paneIn.classList.add('drop'); }));
+  ['dragleave', 'drop'].forEach(ev => paneIn.addEventListener(ev, (e) => { e.preventDefault(); paneIn.classList.remove('drop'); }));
+  paneIn.addEventListener('drop', (e) => loadFile(e.dataTransfer && e.dataTransfer.files[0]));
 
-        // Ctrl/Cmd + Enter to obfuscate
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                runObfuscation();
-            }
-        });
-    }
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runObfuscation(); }
+  });
+}
 
-    // ============================================================
-    // 8. ADSENSE BOOTSTRAP
-    // ============================================================
-    // Pushes exactly once per <ins class="adsbygoogle"> slot, and skips any
-    // slot that's already been filled — calling push() more times than
-    // there are empty slots throws "All ins elements already have ads".
-    function initAdsense() {
-        try {
-            document.querySelectorAll('ins.adsbygoogle').forEach((ins) => {
-                if (!ins.getAttribute('data-adsbygoogle-status')) {
-                    (window.adsbygoogle = window.adsbygoogle || []).push({});
-                }
-            });
-        } catch (e) {
-            // Silently ignore — AdSense may not be loaded in this environment
-        }
-    }
+// ============================================================
+// 8. ADSENSE (one push per empty slot)
+// ============================================================
+function initAdsense() {
+  try {
+    document.querySelectorAll('ins.adsbygoogle').forEach((ins) => {
+      if (!ins.getAttribute('data-adsbygoogle-status')) (window.adsbygoogle = window.adsbygoogle || []).push({});
+    });
+  } catch (e) { /* AdSense not available here */ }
+}
 
-    // ============================================================
-    // 9. INIT
-    // ============================================================
-    buildOptions();
-    bind();
-    updateMeters();
-    initAdsense();
+// ============================================================
+// 9. INIT
+// ============================================================
+buildOptions();
+bind();
+updateMeters();
+initAdsense();
 })();
 </script>
 </body>
