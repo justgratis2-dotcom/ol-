@@ -1,0 +1,47 @@
+# =============================================================================
+#  ebice.site — response headers
+# -----------------------------------------------------------------------------
+#  READ THIS FIRST: GitHub Pages cannot set response headers and ignores this
+#  file entirely. It is here so the hardening is one copy-paste away, and it
+#  applies the moment you either
+#    (a) move the deploy to Cloudflare Pages / Netlify (they read this file from
+#        the output directory), or
+#    (b) proxy ebice.site through Cloudflare and add the same values as
+#        "Modify Response Header" rules (Rules → Page Rules / Configuration
+#        Rules) — that keeps GitHub Pages as the origin and costs nothing.
+#
+#  Until then, what the pages can enforce themselves is in the HTML head:
+#    - <meta http-equiv="Content-Security-Policy"> for object/base/form
+#    - <meta name="referrer">
+#    - the JS frame lock in assets/site-guard.js (frame-ancestors and
+#      X-Frame-Options cannot be carried by a <meta> tag, which is why the
+#      lines below are inert on the current host).
+#
+#  The CSP is deliberately an allowlist, not a nonce/hash policy. Google's ad
+#  code injects inline scripts and styles at runtime, and a hash of our own
+#  inline engine would break the first time anyone edits index.html without
+#  recomputing it. If ads ever stop filling, the first thing to test is a
+#  looser script-src/img-src/frame-src, or removing the CSP line.
+# =============================================================================
+
+/*
+  # Transport: only worth setting once "Enforce HTTPS" is on in Pages settings
+  # and https://ebice.site works from a clean browser profile.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # Response hygiene
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Opener-Policy: same-origin
+  # Deliberately NOT set: Cross-Origin-Embedder-Policy (breaks AdSense frames),
+  # Cross-Origin-Resource-Policy (would break link previews of og-image.png).
+
+  # Everything the site never needs, denied centrally
+  Permissions-Policy: accelerometer=(), attribution-reporting=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(self), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), hid=(), interest-cohort=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), window-placement=(), xr-spatial-tracking=()
+
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://adservice.google.com https://partner.googleadservices.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fundingchoicesmessages.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://td.doubleclick.net https://www.google.com https://adservice.google.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; connect-src 'self' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://adservice.google.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# Static assets: no content hash in the file names, so keep the TTL honest.
+/assets/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400

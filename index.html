@@ -1,23 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ebice="app">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07080b">
+<!-- ebice:guard:begin ========================================================
+     Ebice integrity bootstrap — the ONE place to edit when the domain changes.
+     · add / remove hostnames in `allow` (and `allowPath` for Pages sub-paths)
+     · set guard:false (or load the page with ?guard=off) to switch every layer off
+     The companion layer lives in assets/site-guard.js and reads this config.
+     Keep every page byte-identical: `npm test` fails if they drift.
+     ======================================================================== -->
+<style>html[data-ebice-guard="blocked"] body{background:#07080b}html[data-ebice-guard="blocked"] body>*:not([data-ebice-notice]){display:none!important}</style>
+<script>
+(function () {
+  var CFG = {
+    site: 'ebice.site',
+    canonical: 'https://ebice.site/',
+    adClient: 'ca-pub-7924204418079811',   // foreign publisher ids get stripped, never billed
+    guard: true,                            // false = disable every protection layer
+    allow: ['ebice.site', 'www.ebice.site'],  // exact hostnames that may serve this site
+    allowPath: [                                  // exact host + path prefix, for Pages previews
+      { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
+    ],
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev']
+  };
+  var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
+  function suffix(list, h) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-list[i].length - 1) === '.' + list[i]) return true;
+    return false;
+  }
+  // `dev` = a machine or a preview URL, where every layer stands down (it would
+  // otherwise block your own localhost run and the deploy preview).
+  dev = !host || host === '[::1]' || !!location.port || suffix(CFG.preview, host);
+  var exact = CFG.allow.indexOf(host) !== -1;
+  var pages = false;
+  for (var i = 0; i < CFG.allowPath.length; i++) {
+    if (host === CFG.allowPath[i].host && path.indexOf(CFG.allowPath[i].path) === 0) pages = true;
+  }
+  var off = !CFG.guard || /[?&#]guard=off/.test(location.search + location.hash);
+  try { if (sessionStorage.getItem('ebice-guard') === 'off') off = true; } catch (e) {}
+  var authorized = off || dev || exact || pages;
+  CFG.host = host; CFG.dev = dev; CFG.off = off; CFG.authorized = authorized;
+  CFG.allows = function (h) { return !h || exact || suffix(CFG.allow, h) || suffix(CFG.preview, h); };
+  window.__ebiceGuard = CFG;
+  if (!authorized) document.documentElement.setAttribute('data-ebice-guard', 'blocked');
+  window.addEventListener('load', function () {
+    if (!off && !window.__ebiceGuardLoaded && window.console) {
+      console.warn('[ebice] assets/site-guard.js did not load — this copy is incomplete.');
+    }
+  });
+})();
+</script>
+<script src="assets/site-guard.js" defer></script>
+<!-- ebice:guard:end -->
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Ebice — ebice.site">
+<meta name="robots" content="max-image-preview:large, noai, noimageai">
+<!-- object/base/form only. Deliberately no script-src/style-src/img-src allowlist:
+     Google AdSense adds hosts over time and an out-of-date list silently kills
+     ad revenue. The stricter policy for hosts that read response headers ships
+     in docs/cloudflare/_headers. -->
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="google-adsense-account" content="ca-pub-7924204418079811">
+<link rel="license" href="https://ebice.site/terms/">
 <title>Ebice — Roblox Lua Obfuscator</title>
 <meta name="description" content="Ebice — modern multi-layer Lua obfuscator for Roblox. Rename identifiers, encrypt strings, obfuscate numbers and inject opaque control flow, right in your browser.">
 <meta property="og:title" content="Ebice — Roblox Lua Obfuscator">
 <meta property="og:description" content="Multi-layer Lua obfuscator for Roblox scripts: identifier renaming, string encryption and control-flow noise.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Ebice">
 <meta property="og:url" content="https://ebice.site/">
 <meta property="og:image" content="https://ebice.site/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ebice — multi-layer Lua obfuscator for Roblox scripts">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ebice — Roblox Lua Obfuscator">
 <meta name="twitter:description" content="Multi-layer Lua obfuscator for Roblox scripts: identifier renaming, string encryption and control-flow noise.">
 <meta name="twitter:image" content="https://ebice.site/og-image.png">
+<meta name="twitter:image:alt" content="Ebice — multi-layer Lua obfuscator for Roblox scripts">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="canonical" href="https://ebice.site/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +88,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- Google AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811" crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924204418079811" crossorigin="anonymous" referrerpolicy="strict-origin-when-cross-origin"></script>
 
 <script type="application/ld+json">
 {
@@ -55,13 +118,53 @@
     {
       "@type": "Question",
       "name": "Which obfuscation layers should I use?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The Balanced preset is a good default for most scripts. Use Light if you only want to hide variable names quickly, and Maximum when file size and a slightly slower script are an acceptable trade-off for stronger protection." }
+      "acceptedAnswer": { "@type": "Answer", "text": "The Balanced preset is a good default for most scripts. Use Light if you only want to hide variable names quickly, and Maximum when a larger file and a slightly slower script are an acceptable trade-off for stronger protection." }
     },
     {
       "@type": "Question",
       "name": "Is Ebice free to use?",
       "acceptedAnswer": { "@type": "Answer", "text": "Yes, Ebice is free with no account required. The site is supported by ads." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the generated file reveal anything about me?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. The signed header names the tool, the layer list and a timestamp; the ownership stamp is a one-way fingerprint of your source text. Neither contains your name, your IP, your machine or your file name. Both are optional \u2014 untick them in \u201cOutput & privacy\u201d." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can someone copy this website and run it as their own?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Then they are doing it with no licence. Ebice is a static page, so client-side locks are deterrents rather than walls: the page refuses to run on an unknown domain, refuses to be framed, deletes any ad code that is not the owner's publisher id, and the terms + /dmca/ notice give the owner a takedown path. Report a copycat there." }
     }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Ebice",
+  "alternateName": "Ebice Lua Obfuscator",
+  "url": "https://ebice.site/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (browser only)",
+  "browserRequirements": "Requires JavaScript. No installation, no account.",
+  "description": "Multi-layer Lua obfuscator for Roblox scripts that runs entirely in the browser.",
+  "softwareVersion": "2.7.0",
+  "datePublished": "2026-10-27",
+  "isAccessibleForFree": true,
+  "license": "https://ebice.site/terms/",
+  "copyrightYear": "2026",
+  "copyrightHolder": { "@type": "Organization", "name": "Ebice", "url": "https://ebice.site/" },
+  "creator": { "@type": "Organization", "name": "Ebice", "url": "https://ebice.site/" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": [
+    "Identifier renaming",
+    "Base64 and XOR string encryption with per-run keys",
+    "Number obfuscation and hex literals",
+    "Opaque control flow and dead code injection",
+    "Runtime integrity self-check",
+    "Ownership fingerprint stamped in the output"
   ]
 }
 </script>
@@ -69,6 +172,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
+  color-scheme:dark;
   --bg-0:#07080b;--bg-1:#0d0f14;--bg-2:#12151c;--bg-3:#191d26;
   --line:#232833;--line-soft:#1a1e27;
   --text-0:#f2f5fb;--text-1:#a8b1c4;--text-2:#6b7589;
@@ -240,7 +344,25 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
 .toast.error .toast-indicator{background:var(--err)}
 .toast.info .toast-indicator{background:var(--accent-2)}
 
+/* ===== trust strip (what the hardening actually does) ===== */
+.trust{display:flex;flex-wrap:wrap;gap:8px;margin:0 2px 20px}
+.trust span{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--text-1);
+  background:var(--bg-1);border:1px solid var(--line-soft);border-radius:999px;padding:5px 11px;letter-spacing:.01em}
+.trust svg{width:13px;height:13px;flex-shrink:0;color:var(--ok)}
+.trust .warn{color:var(--accent-2)}
+
+/* ===== output & privacy row ===== */
+.tail-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 18px;margin-top:14px;padding-top:6px;border-top:1px solid var(--line-soft)}
+.tail-row .opt{padding:9px 6px}
+.tail-note{grid-column:1/-1;font-size:11.5px;color:var(--text-2);margin:6px 6px 0;line-height:1.5}
+.tail-note b{color:var(--text-1);font-weight:600}
+html[data-ebice-origin="verified"] .trust .verified{display:inline-flex}
+.trust .verified{display:none}
+
+textarea{user-select:text;-webkit-user-select:text}
+
 ::-webkit-scrollbar{width:9px;height:9px}
+
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#262c38;border-radius:999px;border:2px solid var(--bg-1)}
 ::-webkit-scrollbar-thumb:hover{background:#333b4b}
@@ -264,41 +386,49 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
       </div>
     </a>
     <div class="topbar-spacer"></div>
-    <div class="engine-pill"><span class="dot"></span>Engine ready &middot; v2.6.0</div>
+    <div class="engine-pill"><span class="dot"></span>Engine ready &middot; v2.7.0</div>
   </header>
 
   <p class="tagline rise" style="--i:1">Paste a Roblox Lua script, choose your layers, and get back code that is far harder to read and reverse engineer, without changing what it does. Everything runs locally in your browser — nothing is uploaded.</p>
 
-  <div class="ad-slot rise" style="--i:2" aria-label="Advertisement">
+  <div class="trust rise" style="--i:2" role="list" aria-label="How Ebice protects you">
+    <span role="listitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Your code never leaves this tab</span>
+    <span role="listitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No account, no storage, no analytics</span>
+    <span role="listitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Locked-down CSP, no forms or plugins</span>
+    <span role="listitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Stamped output: proof it came from you</span>
+    <span class="verified" role="listitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Genuine domain</span>
+  </div>
+
+  <div class="ad-slot rise" style="--i:3" aria-label="Advertisement">
     <span class="ad-label">Ad</span>
     <!-- Replace data-ad-slot with your real AdSense ad unit ID -->
     <ins class="adsbygoogle" style="display:block;width:100%;min-height:90px;" data-ad-client="ca-pub-7924204418079811" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
   </div>
 
   <main class="editor-grid">
-    <section class="pane rise" style="--i:3" id="pane-in">
+    <section class="pane rise" style="--i:4" id="pane-in">
       <div class="pane-head">
         <span>Source</span><span class="filename">script.lua</span><span class="spacer"></span>
         <span class="meter" id="input-meter">0 lines</span>
       </div>
       <div class="pane-body">
-        <textarea id="input-code" aria-label="Lua source code" placeholder="-- Paste your Roblox Lua code here (or drop a .lua file)&#10;-- Example:&#10;print(&quot;Hello Roblox&quot;)&#10;local coins = 100&#10;game.Players.LocalPlayer..." spellcheck="false"></textarea>
+        <textarea id="input-code" aria-label="Lua source code" aria-describedby="privacy-note" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="-- Paste your Roblox Lua code here (or drop a .lua file)&#10;-- Example:&#10;print(&quot;Hello Roblox&quot;)&#10;local coins = 100&#10;game.Players.LocalPlayer..." spellcheck="false"></textarea>
       </div>
     </section>
 
-    <section class="pane rise" style="--i:4" id="pane-out">
+    <section class="pane rise" style="--i:5" id="pane-out">
       <div class="pane-head">
         <span>Obfuscated</span><span class="filename">protected.lua</span><span class="spacer"></span>
         <span class="meter" id="output-meter">0 lines</span>
         <span class="bar"></span>
       </div>
       <div class="pane-body">
-        <textarea id="output-code" class="output" aria-label="Obfuscated output" placeholder="-- The obfuscated output will appear here..." readonly spellcheck="false"></textarea>
+        <textarea id="output-code" class="output" aria-label="Obfuscated output" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="-- The obfuscated output will appear here..." readonly spellcheck="false"></textarea>
       </div>
     </section>
   </main>
 
-  <section class="options-panel rise" style="--i:5">
+  <section class="options-panel rise" style="--i:6">
     <div class="panel-head">
       <div class="panel-title">Obfuscation layers</div>
       <span class="counter"><b id="count-on">0</b> / <span id="count-all">0</span> active</span>
@@ -310,9 +440,16 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
       </div>
     </div>
     <div class="groups" id="options-grid"></div>
+
+    <div class="tail-row" id="privacy-row">
+      <label class="opt"><input type="checkbox" data-out="attribution" checked><span class="opt-text"><span class="opt-label">Signed header<span class="opt-tag">brand</span></span><span class="opt-desc">Comment naming Ebice and the layer list in the output</span></span></label>
+      <label class="opt"><input type="checkbox" data-out="fingerprint" checked><span class="opt-text"><span class="opt-label">Ownership stamp<span class="opt-tag">fp</span></span><span class="opt-desc">Fingerprint of your source, so you can prove the script is yours</span></span></label>
+      <label class="opt"><input type="checkbox" data-out="wipe" checked><span class="opt-text"><span class="opt-label">Wipe on close<span class="opt-tag">privacy</span></span><span class="opt-desc">Clear both panes when you leave the page</span></span></label>
+      <p class="tail-note" id="privacy-note">Nothing is sent anywhere: the page has no forms, no storage and no analytics of its own, and the <b>Content-Security-Policy</b> blocks form submissions and plug-ins. The output panes are read-only by default — copy or download only what you asked for.</p>
+    </div>
   </section>
 
-  <div class="actions rise" style="--i:6">
+  <div class="actions rise" style="--i:7">
     <button class="btn btn-primary" id="btn-run">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <span id="run-label">Obfuscate</span>
@@ -342,9 +479,9 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
     </div>
   </div>
 
-  <section class="section-block rise" style="--i:7" aria-labelledby="features-h">
+  <section class="section-block rise" style="--i:8" aria-labelledby="features-h">
     <h2 id="features-h">What Ebice protects</h2>
-    <p class="section-sub">Four independent techniques, mixed and matched through the presets above.</p>
+    <p class="section-sub">Four independent techniques for your script, mixed and matched through the presets above — plus the layer that protects this site from being copied.</p>
     <div class="features">
       <div class="feature">
         <div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M9 9h6v6H9z"/></svg></div>
@@ -364,12 +501,22 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
       <div class="feature">
         <div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></div>
         <h3>Runs in your browser</h3>
-        <p>No upload, no account, no server storage. Your script never leaves your machine.</p>
+        <p>No upload, no account, no server storage. Your script never leaves your machine, and the CSP forbids the page from sending it anywhere else.</p>
+      </div>
+      <div class="feature">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-8-8V4h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.5"/></svg></div>
+        <h3>Ownership stamp</h3>
+        <p>The output can carry a fingerprint of your source, so if the script leaks you still have a way to show it went through your tool first.</p>
+      </div>
+      <div class="feature">
+        <div class="ico-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.5 12.2 11 14l3.6-3.8"/></svg></div>
+        <h3>Harder to clone</h3>
+        <p>Unknown domains are bounced back to ebice.site, foreign AdSense ids are stripped, framing is refused, and AI scrapers are told off in robots.txt.</p>
       </div>
     </div>
   </section>
 
-  <section class="section-block rise" style="--i:8" aria-labelledby="how-h">
+  <section class="section-block rise" style="--i:9" aria-labelledby="how-h">
     <h2 id="how-h">How it works</h2>
     <p class="section-sub">Three steps, no install.</p>
     <div class="steps">
@@ -391,7 +538,7 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
     </div>
   </section>
 
-  <section class="section-block rise" style="--i:9" aria-labelledby="faq-h">
+  <section class="section-block rise" style="--i:10" aria-labelledby="faq-h">
     <h2 id="faq-h">Frequently asked questions</h2>
     <p class="section-sub">Short answers about obfuscation and how Ebice handles your code.</p>
 
@@ -419,6 +566,14 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
       <summary>Is Ebice free to use?<span class="plus"></span></summary>
       <div class="faq-a">Yes, Ebice is free with no account required. The site is supported by ads.</div>
     </details>
+    <details class="faq-item">
+      <summary>Does the generated file reveal anything about me?<span class="plus"></span></summary>
+      <div class="faq-a">No. The signed header names the tool, the layer list and a timestamp; the ownership stamp is a one-way fingerprint of <em>your</em> source text. Neither contains your name, your IP, your machine or your file name. Both are optional — untick them in “Output &amp; privacy”.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Can someone copy this website and run it as their own?<span class="plus"></span></summary>
+      <div class="faq-a">Then they are doing it with no licence. Ebice is a static page, so client-side locks are deterrents rather than walls: the page refuses to run on an unknown domain, refuses to be framed, deletes any ad code that is not the owner’s publisher id, and the terms + <a href="https://ebice.site/dmca/">/dmca/ notice</a> give the owner a takedown path. Report a copycat there.</div>
+    </details>
   </section>
 
   <div class="ad-slot" aria-label="Advertisement">
@@ -428,8 +583,10 @@ textarea.output{color:#b9c4dc;font-size:12.5px;word-break:break-word}
 
   <footer class="foot">
     <span>&copy; <span id="year">2026</span> Ebice</span><span class="sep"></span>
-    <a href="https://ebice.site/terms">Terms of Service</a><span class="sep"></span>
-    <a href="https://ebice.site/privacy/">Privacy Policy</a>
+    <a href="https://ebice.site/terms/">Terms of Service</a><span class="sep"></span>
+    <a href="https://ebice.site/privacy/">Privacy Policy</a><span class="sep"></span>
+    <a href="https://ebice.site/dmca/">Report a copycat</a><span class="sep"></span>
+    <span data-ebice-copy>Only ebice.site is licensed to serve this tool</span>
   </footer>
 </div>
 
@@ -494,22 +651,39 @@ function showToast(msg, kind) {
 }
 
 // ============================================================
-// 3. OPTIONS UI
+// 3. OPTIONS UI  (built with DOM nodes only — no HTML strings,
+//    so user text can never be interpreted as markup)
 // ============================================================
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function buildOptionCheckbox(key, value, checked) {
+  const cb = el('input');
+  cb.type = 'checkbox';
+  cb.dataset[key] = value;
+  cb.checked = !!checked;
+  return cb;
+}
+
 function buildOptions() {
   const grid = $('#options-grid');
-  grid.innerHTML = '';
+  grid.textContent = '';
   GROUPS.forEach(g => {
-    const box = document.createElement('div');
-    box.className = 'group';
-    box.innerHTML = '<div class="group-title">' + g.title + '</div>';
+    const box = el('div', 'group');
+    box.appendChild(el('div', 'group-title', g.title));
     g.items.forEach(opt => {
-      const label = document.createElement('label');
-      label.className = 'opt';
-      label.innerHTML =
-        '<input type="checkbox" data-id="' + opt.id + '"' + (opt.on ? ' checked' : '') + '>' +
-        '<span class="opt-text"><span class="opt-label">' + opt.label + '<span class="opt-tag">' + opt.tag + '</span></span>' +
-        '<span class="opt-desc">' + opt.desc + '</span></span>';
+      const label = el('label', 'opt');
+      label.appendChild(buildOptionCheckbox('id', opt.id, opt.on));
+      const text = el('span', 'opt-text');
+      const line = el('span', 'opt-label', opt.label);
+      line.appendChild(el('span', 'opt-tag', opt.tag));
+      text.appendChild(line);
+      text.appendChild(el('span', 'opt-desc', opt.desc));
+      label.appendChild(text);
       box.appendChild(label);
     });
     grid.appendChild(box);
@@ -524,6 +698,15 @@ function readOptions() {
   document.querySelectorAll('#options-grid input[type="checkbox"]').forEach(cb => { map[cb.dataset.id] = cb.checked; });
   return map;
 }
+
+// "Output & privacy" switches: not obfuscation layers, so they live outside
+// the layer counter and are never sent to the engine as layers.
+function readOutFlags() {
+  const map = {};
+  document.querySelectorAll('#privacy-row input[type="checkbox"]').forEach(cb => { map[cb.dataset.out] = cb.checked; });
+  return map;
+}
+
 
 // Updates the "x / y active" counter and highlights the matching preset.
 function syncOptionsState() {
@@ -551,12 +734,70 @@ function applyPreset(name) {
 // 4. UTILITIES
 // ============================================================
 const HEX = '0123456789abcdef';
-const randInt = (max) => max <= 0 ? 0 : Math.floor(Math.random() * max);
+const LIMITS = { maxInputBytes: 1024 * 1024, maxFileBytes: 2 * 1024 * 1024 };
+
+// CSPRNG-backed randomness. Math.random() is cheap to predict, and predictable
+// names or keys turn "hard to read" into "trivially reversible by script".
+const CSPRNG = (window.crypto && typeof window.crypto.getRandomValues === 'function') ? window.crypto : null;
+const _u32 = CSPRNG ? new Uint32Array(1) : null;
+function randUint32() {
+  if (CSPRNG) { CSPRNG.getRandomValues(_u32); return _u32[0]; }
+  return Math.floor(Math.random() * 4294967296);
+}
+// Rejection sampling: plain `% max` biases the low values and leaks the modulus.
+function randInt(max) {
+  if (!(max > 0)) return 0;
+  if (!CSPRNG) return Math.floor(Math.random() * max);
+  const limit = 4294967296 - (4294967296 % max);
+  let x = randUint32();
+  while (x >= limit) x = randUint32();
+  return x % max;
+}
+function randBytes(n) {
+  const a = new Uint8Array(n);
+  if (CSPRNG) CSPRNG.getRandomValues(a);
+  else for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 256);
+  return a;
+}
+
 function randHex(len) { let s = ''; for (let i = 0; i < len; i++) s += HEX[randInt(16)]; return s; }
 function randVarName() {
   const p = ['_', '__', 'l_', 'v_', 'o_', 'x_', '_0x'];
   return p[randInt(p.length)] + randHex(6);
 }
+// Base64 with a permuted alphabet per run: same math as btoa, no reusable
+// signature for anyone hunting for "the decoder" in the output.
+const B64_STD = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function shuffledAlphabet() {
+  const a = B64_STD.split('');
+  for (let i = a.length - 1; i > 1; i--) { const j = randInt(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a.join('');
+}
+function encodeBase64WithAlphabet(bytes, alphabet) {
+  const std = bytesToBase64(bytes);
+  let out = '';
+  for (let i = 0; i < std.length; i++) { const c = std[i]; out += c === '=' ? '=' : alphabet[B64_STD.indexOf(c)]; }
+  return out;
+}
+// One-way fingerprint of the source (FNV-1a, 64 bit). Lets an author show that
+// a leaked script was produced from the same file, without storing anything.
+function fingerprint(text) {
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 + c + i, 0x85ebca6b) >>> 0;
+  }
+  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+}
+// Control characters other than \t \n \r are dropped: NUL and friends can
+// truncate an emitted Lua string and desync the engine's own placeholders.
+function sanitizeSource(text) {
+  const s = String(text);
+  const clean = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+  return { code: clean, dropped: s.length - clean.length };
+}
+
 function escapeLuaString(str) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
 }
@@ -593,7 +834,7 @@ function updateMeters() {
   const i = byteSize(input.value), o = byteSize(output.value);
   statIn.textContent = formatBytes(i);
   statOut.textContent = formatBytes(o);
-  statRatio.innerHTML = (i > 0 && o > 0) ? (o / i).toFixed(2) + 'x' : '&mdash;';
+  statRatio.textContent = (i > 0 && o > 0) ? (o / i).toFixed(2) + 'x' : '\u2014';
 }
 
 // Counts the output size up for a little feedback after each run.
@@ -613,9 +854,11 @@ function animateStats() {
 // ============================================================
 // 5. OBFUSCATION ENGINE
 // ============================================================
+const VERSION = '2.7.0';
 const RESERVED = new Set(['local','function','end','if','then','else','elseif','for','while','do','repeat','until','return','break','nil','true','false','and','or','not','in','continue','goto']);
 
-function obfuscateLua(code, o) {
+function obfuscateLua(code, o, flags) {
+  flags = flags || {};
   if (!code.trim()) return '-- [no source code]\n-- Paste Lua code in the left pane.';
 
   const used = new Set();
@@ -674,8 +917,8 @@ function obfuscateLua(code, o) {
     src = src.replace(/(?<![\w.\u0001])(\d+)(?![\w.\u0001])/g, (match, numStr) => {
       const n = parseInt(numStr, 10);
       if (isNaN(n) || !Number.isSafeInteger(n)) return match;
-      if (n <= 1 && Math.random() > 0.5) return match;
-      if (o.hex_numbers && Math.random() > 0.5) return '0x' + n.toString(16);
+      if (n <= 1 && randInt(2) === 0) return match;
+      if (o.hex_numbers && randInt(2) === 0) return '0x' + n.toString(16);
       if (o.number_obf) { const a = randInt(100) + 1; return '(' + a + ' - ' + (a - n) + ')'; }
       return match;
     });
@@ -689,7 +932,7 @@ function obfuscateLua(code, o) {
       const t = line.trim();
       const startsOk = t && !/^(end|else|elseif|until|[)}\]]|\.\.|and\b|or\b)/.test(t);
       const prevOk = !/([,=({\[+\-*\/%^.<>~#]|\b(and|or|not|in|local|return)\b)$/.test(prev);
-      if (depth === 0 && startsOk && prevOk && Math.random() < prob) out.push(gen());
+      if (depth === 0 && startsOk && prevOk && randInt(1000) < prob * 1000) out.push(gen());
       out.push(line);
       depth += (line.match(/[({\[]/g) || []).length - (line.match(/[)}\]]/g) || []).length;
       if (depth < 0) depth = 0;
@@ -703,7 +946,22 @@ function obfuscateLua(code, o) {
 
   // -------- Phase 4: string obfuscation + restore --------
   const decB = uniq(), decX = uniq();
+  const alphabet = shuffledAlphabet();
   let needB = false, needX = false;
+  const xorWith = (bytes, key) => bytes.map((b, i) => b ^ key[i % key.length]);
+  // 1..255: a NUL byte inside the key is what gets a script truncated by naive
+  // tooling, so it is kept out of every key we emit.
+  function newKey() { return Array.from(randBytes(8), b => 1 + (b % 255)); }
+  // Splitting a payload is safe only on boundaries that cannot cut an escape:
+  // base64 is any index, "\ddd" runs are every 4 characters.
+  function emitPayload(payload, align) {
+    if (!o.split_strings || payload.length < 32) return '"' + payload + '"';
+    let mid = Math.floor(payload.length / 2);
+    if (align > 1) mid = Math.max(align, Math.floor(mid / align) * align);
+    if (mid >= payload.length) mid = payload.length - align;
+    if (mid <= 0) return '"' + payload + '"';
+    return '("' + payload.slice(0, mid) + '".."' + payload.slice(mid) + '")';
+  }
 
   const needsParens = (whole, off) => {
     const before = whole.slice(0, off).trimEnd();
@@ -717,14 +975,20 @@ function obfuscateLua(code, o) {
     if (q !== '"' && q !== "'") return raw;           // long strings stay as-is
     const dec = unescapeLua(raw.slice(1, -1));
     if (dec === null || !dec.length) return raw;
+    const bytes = toBytes(dec);
+    if (o.string_encrypt && o.xor_strings) {          // both layers: XOR inside Base64
+      const key = newKey();
+      needB = true; needX = true;
+      return decX + '(' + decB + '(' + emitPayload(encodeBase64WithAlphabet(xorWith(bytes, key), alphabet), 1) + '),' + emitPayload(byteEscapes(key), 4) + ')';
+    }
     if (o.xor_strings) {
-      const key = randHex(4), bytes = toBytes(dec);
+      const key = newKey();
       needX = true;
-      return decX + '("' + byteEscapes(bytes.map((b, i) => b ^ key.charCodeAt(i % key.length))) + '","' + key + '")';
+      return decX + '(' + emitPayload(byteEscapes(xorWith(bytes, key)), 4) + ',' + emitPayload(byteEscapes(key), 4) + ')';
     }
     if (o.string_encrypt) {
       needB = true;
-      return decB + '("' + bytesToBase64(toBytes(dec)) + '")';
+      return decB + '(' + emitPayload(encodeBase64WithAlphabet(bytes, alphabet), 1) + ')';
     }
     if (o.split_strings && dec.length > 3) {
       const mid = 1 + randInt(dec.length - 1);
@@ -740,21 +1004,43 @@ function obfuscateLua(code, o) {
   });
 
   // -------- Phase 5: preamble (runtime helpers, guards, proxy) --------
+  const checks = [];   // known-answer vectors: they prove the decoders survived
   let pre = '';
-  if (needB) pre += 'local ' + decB + '=(function() local t="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" local m={} for i=1,64 do m[t:sub(i,i)]=i-1 end return function(s) local r,n,v={},0,0 for i=1,#s do local c=m[s:sub(i,i)] if c then v=v*64+c n=n+6 if n>=8 then n=n-8 local b=math.floor(v/2^n) v=v-b*2^n r[#r+1]=string.char(b) end end end return table.concat(r) end end)()\n';
-  if (needX) pre += 'local ' + decX + '=function(s,k) local r={} local n=#k for i=1,#s do r[i]=string.char(bit32.bxor(s:byte(i),k:byte((i-1)%n+1))) end return table.concat(r) end\n';
+  if (needB) {
+    pre += 'local ' + decB + '=(function() local t="' + alphabet + '" local m={} for i=1,64 do m[t:sub(i,i)]=i-1 end return function(s) local r,n,v={},0,0 for i=1,#s do local c=m[s:sub(i,i)] if c then v=v*64+c n=n+6 if n>=8 then n=n-8 local b=math.floor(v/2^n) v=v-b*2^n r[#r+1]=string.char(b) end end end return table.concat(r) end end)()\n';
+    const k = 'Ebice';
+    checks.push(decB + '(' + emitPayload(encodeBase64WithAlphabet(toBytes(k), alphabet), 1) + ')~=' + '"Ebice"');
+  }
+  if (needX) {
+    pre += 'local ' + decX + '=function(s,k) local r={} local n=#k for i=1,#s do r[i]=string.char(bit32.bxor(s:byte(i),k:byte((i-1)%n+1))) end return table.concat(r) end\n';
+    const key = newKey(), k = 'ok';
+    checks.push(decX + '(' + emitPayload(byteEscapes(xorWith(toBytes(k), key)), 4) + ',' + emitPayload(byteEscapes(key), 4) + ')~=' + '"ok"');
+  }
   if (o.antitamper) {
-    const g = uniq();
-    pre += 'local ' + g + '=function() local ok=pcall(function() return true end) if not ok then return end end ' + g + '()\n';
+    if (checks.length) {
+      // Real self-test: if anyone rewrites or strips a decoder above, the run
+      // stops here instead of shipping a script full of garbage strings.
+      pre += 'if ' + checks.join(' or ') + ' then error("[Ebice] integrity check failed",0) end\n';
+    } else {
+      const g = uniq();
+      pre += 'local ' + g + '=function() local ok=pcall(function() return true end) if not ok then return end end ' + g + '()\n';
+    }
   }
   if (o.proxy_functions) {
     pre += 'local ' + uniq() + '=function(f,...) return f(...) end\n';
   }
 
-  const header =
-    '-- Obfuscated with Ebice\n' +
-    '-- Layers: ' + (Object.entries(o).filter(([, v]) => v).map(([k]) => k).join(', ') || 'none') + '\n' +
-    '-- Generated: ' + new Date().toISOString() + '\n\n';
+  const layersOn = Object.keys(o).filter((k) => o[k]);
+  let header = '';
+  if (flags.attribution) {
+    header += '-- Ebice v' + VERSION + ' — https://ebice.site — obfuscation is a deterrent, not encryption\n' +
+              '-- Layers: ' + (layersOn.join(', ') || 'none') + '\n' +
+              '-- Generated: ' + new Date().toISOString() + '\n';
+  }
+  if (flags.fingerprint) {
+    header += '-- Ebice-FP: ' + fingerprint(code) + '\n';
+  }
+  if (header) header += '\n';
 
   return header + pre + src.replace(/^\s*\n/, '');
 }
@@ -764,8 +1050,14 @@ function obfuscateLua(code, o) {
 // ============================================================
 function runObfuscation() {
   if (busy) return;
-  const code = input.value;
-  if (!code.trim()) { showToast('Nothing to obfuscate — the input is empty.', 'error'); return; }
+  const raw = input.value;
+  if (!raw.trim()) { showToast('Nothing to obfuscate — the input is empty.', 'error'); return; }
+  if (byteSize(raw) > LIMITS.maxInputBytes) {
+    showToast('Input is over ' + formatBytes(LIMITS.maxInputBytes) + ' — split the script before obfuscating.', 'error');
+    return;
+  }
+  const { code, dropped } = sanitizeSource(raw);
+  const flags = readOutFlags();
 
   busy = true;
   const btn = $('#btn-run'), label = $('#run-label');
@@ -775,11 +1067,11 @@ function runObfuscation() {
 
   setTimeout(() => {
     try {
-      output.value = obfuscateLua(code, readOptions());
+      output.value = obfuscateLua(code, readOptions(), flags);
       setMeters();
       animateStats();
       paneOut.classList.add('flash');
-      showToast('Code obfuscated successfully.');
+      showToast('Code obfuscated successfully' + (dropped ? ' — ' + dropped + ' control character' + (dropped === 1 ? '' : 's') + ' removed from the source' : '') + '.');
     } catch (e) {
       console.error(e);
       showToast('Obfuscation failed: ' + e.message, 'error');
@@ -854,11 +1146,29 @@ end
 
 function loadFile(file) {
   if (!file) return;
-  if (file.size > 2 * 1048576) { showToast('File is too large (2 MB max).', 'error'); return; }
+  // Refuse obvious containers before reading them: a .lua drop is text, a zip
+  // or an image is somebody probing the page with the wrong file.
+  const BINARY = /^(image|audio|video|application\/(zip|pdf|x-7z|vnd|octet-stream))/i;
+  if (file.type && BINARY.test(file.type)) { showToast('That file is not plain text.', 'error'); return; }
+  if (file.size > LIMITS.maxFileBytes) { showToast('File is too large (' + formatBytes(LIMITS.maxFileBytes) + ' max).', 'error'); return; }
   const r = new FileReader();
-  r.onload = () => { input.value = String(r.result); updateMeters(); showToast(file.name + ' loaded.', 'info'); };
+  r.onload = () => {
+    const clean = sanitizeSource(r.result);
+    if (/\u0000/.test(String(r.result))) { showToast('That file looks binary, not Lua source.', 'error'); return; }
+    input.value = clean.code;
+    updateMeters();
+    showToast(file.name + ' loaded' + (clean.dropped ? ' — ' + clean.dropped + ' control char(s) removed' : '') + '.', 'info');
+  };
   r.onerror = () => showToast('Could not read that file.', 'error');
   r.readAsText(file);
+}
+
+// "Wipe on close": clear both panes when the tab is really going away, so the
+// bfcache snapshot and any crash restore do not keep a copy of the script.
+function wipeOnClose(event) {
+  if (event && event.persisted) return;                 // bfcache: back button must still work
+  if (!readOutFlags().wipe) return;
+  try { input.value = ''; output.value = ''; } catch (e) {}
 }
 
 // ============================================================
@@ -876,6 +1186,12 @@ function bind() {
   ['dragenter', 'dragover'].forEach(ev => paneIn.addEventListener(ev, (e) => { e.preventDefault(); paneIn.classList.add('drop'); }));
   ['dragleave', 'drop'].forEach(ev => paneIn.addEventListener(ev, (e) => { e.preventDefault(); paneIn.classList.remove('drop'); }));
   paneIn.addEventListener('drop', (e) => loadFile(e.dataTransfer && e.dataTransfer.files[0]));
+  // Dropping a file anywhere else would navigate the tab away and lose the script.
+  ['dragover', 'drop'].forEach(ev => document.addEventListener(ev, (e) => {
+    if (!paneIn.contains(e.target)) e.preventDefault();
+  }));
+
+  window.addEventListener('pagehide', wipeOnClose);
 
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runObfuscation(); }

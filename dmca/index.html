@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-ebice="doc">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07080b">
+<!-- ebice:guard:begin ========================================================
+     Ebice integrity bootstrap — the ONE place to edit when the domain changes.
+     · add / remove hostnames in `allow` (and `allowPath` for Pages sub-paths)
+     · set guard:false (or load the page with ?guard=off) to switch every layer off
+     The companion layer lives in assets/site-guard.js and reads this config.
+     Keep every page byte-identical: `npm test` fails if they drift.
+     ======================================================================== -->
+<style>html[data-ebice-guard="blocked"] body{background:#07080b}html[data-ebice-guard="blocked"] body>*:not([data-ebice-notice]){display:none!important}</style>
+<script>
+(function () {
+  var CFG = {
+    site: 'ebice.site',
+    canonical: 'https://ebice.site/',
+    adClient: 'ca-pub-7924204418079811',   // foreign publisher ids get stripped, never billed
+    guard: true,                            // false = disable every protection layer
+    allow: ['ebice.site', 'www.ebice.site'],  // exact hostnames that may serve this site
+    allowPath: [                                  // exact host + path prefix, for Pages previews
+      { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
+    ],
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev']
+  };
+  var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
+  function suffix(list, h) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-list[i].length - 1) === '.' + list[i]) return true;
+    return false;
+  }
+  // `dev` = a machine or a preview URL, where every layer stands down (it would
+  // otherwise block your own localhost run and the deploy preview).
+  dev = !host || host === '[::1]' || !!location.port || suffix(CFG.preview, host);
+  var exact = CFG.allow.indexOf(host) !== -1;
+  var pages = false;
+  for (var i = 0; i < CFG.allowPath.length; i++) {
+    if (host === CFG.allowPath[i].host && path.indexOf(CFG.allowPath[i].path) === 0) pages = true;
+  }
+  var off = !CFG.guard || /[?&#]guard=off/.test(location.search + location.hash);
+  try { if (sessionStorage.getItem('ebice-guard') === 'off') off = true; } catch (e) {}
+  var authorized = off || dev || exact || pages;
+  CFG.host = host; CFG.dev = dev; CFG.off = off; CFG.authorized = authorized;
+  CFG.allows = function (h) { return !h || exact || suffix(CFG.allow, h) || suffix(CFG.preview, h); };
+  window.__ebiceGuard = CFG;
+  if (!authorized) document.documentElement.setAttribute('data-ebice-guard', 'blocked');
+  window.addEventListener('load', function () {
+    if (!off && !window.__ebiceGuardLoaded && window.console) {
+      console.warn('[ebice] assets/site-guard.js did not load — this copy is incomplete.');
+    }
+  });
+})();
+</script>
+<script src="../assets/site-guard.js" defer></script>
+<!-- ebice:guard:end -->
+<title>Copyright, copycats &amp; takedown — Ebice</title>
+<meta name="description" content="How Ebice handles copyright: what is protected, what you keep, how to report a cloned copy of the site, and the DMCA notice and counter-notice process.">
+<link rel="canonical" href="https://ebice.site/dmca/">
+<link rel="license" href="https://ebice.site/terms/">
+<meta name="author" content="Ebice — ebice.site">
+<meta name="robots" content="max-image-preview:large, noai, noimageai">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- Only object/base/form: a script-src or frame-src allowlist would silently
+     break AdSense the next time Google adds a host. The full policy for hosts
+     that read response headers is in docs/cloudflare/_headers. -->
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-0:#07080b;--bg-1:#0d0f14;--bg-2:#12151c;--bg-3:#191d26;
+  --line:#232833;--line-soft:#1a1e27;
+  --text-0:#f2f5fb;--text-1:#a8b1c4;--text-2:#6b7589;
+  --accent:#6d5cff;--accent-2:#22d3ee;--accent-soft:rgba(109,92,255,.13);
+  --r-lg:18px;--r-md:12px;--r-sm:8px;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{min-height:100vh;background:var(--bg-0);color:var(--text-0);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;padding:28px 20px 48px;display:flex;justify-content:center;position:relative;overflow-x:hidden}
+
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 22s ease-in-out infinite alternate}
+.orb.a{width:560px;height:560px;left:-140px;top:-180px;background:rgba(109,92,255,.35)}
+.orb.b{width:480px;height:480px;right:-120px;top:10%;background:rgba(34,211,238,.18);animation-duration:28s;animation-delay:-8s}
+.orb.c{width:420px;height:420px;left:35%;bottom:-220px;background:rgba(109,92,255,.2);animation-duration:34s;animation-delay:-14s}
+@keyframes drift{to{transform:translate(70px,50px) scale(1.12)}}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);background-size:56px 56px;opacity:.35;mask-image:radial-gradient(ellipse at 50% 0,#000 10%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000 10%,transparent 70%)}
+
+.shell{width:100%;max-width:1100px;position:relative;z-index:1}
+.rise{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0) * 70ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:22px;background:rgba(18,21,28,.55);border:1px solid var(--line-soft);border-radius:var(--r-lg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.brand-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(140deg,var(--accent),#4c3fd6 55%,#2b2a66);display:grid;place-items:center;font-weight:700;font-size:19px;color:#fff;box-shadow:0 6px 20px -6px rgba(109,92,255,.7),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .3s}
+.brand:hover .brand-mark{transform:rotate(-8deg) scale(1.06)}
+.brand-name{font-size:19px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.brand-sub{font-size:12px;color:var(--text-2);margin-top:2px}
+.spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-sm);padding:9px 16px;font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid rgba(109,92,255,.4);background:transparent;color:#b3a9ff;text-decoration:none;transition:background .16s,color .16s,border-color .16s,transform .16s}
+.btn:hover{background:var(--accent-soft);border-color:var(--accent);color:#cfc8ff;transform:translateY(-1px)}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.btn .ico{width:15px;height:15px}
+
+.layout{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.toc{position:static!important}}
+
+.toc{position:sticky;top:24px;background:rgba(13,15,20,.85);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 12px}
+.toc-title{font-size:13px;font-weight:600;color:var(--text-1);padding:0 8px 10px;margin-bottom:6px;border-bottom:1px solid var(--line-soft)}
+.toc a{display:block;padding:6px 8px;border-radius:var(--r-sm);font-size:13px;color:var(--text-2);text-decoration:none;border-left:2px solid transparent;transition:background .15s,color .15s,border-color .15s}
+.toc a:hover{background:rgba(255,255,255,.035);color:var(--text-0)}
+.toc a.active{color:var(--text-0);background:var(--accent-soft);border-left-color:var(--accent)}
+
+.doc{background:rgba(13,15,20,.85);border:1px solid var(--line);border-radius:var(--r-lg);padding:34px 36px 30px}
+@media(max-width:520px){.doc{padding:24px 20px}}
+.doc-head{padding-bottom:20px;margin-bottom:8px;border-bottom:1px solid var(--line-soft)}
+h1{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.updated{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-1);background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.intro{margin-top:14px;color:var(--text-1);max-width:70ch}
+section{padding:22px 0 4px}
+h2{font-size:18px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+h2::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex-shrink:0}
+p,li{color:var(--text-1);max-width:75ch}
+p+p,p+ul,ul+p{margin-top:10px}
+ul{padding-left:22px}
+li{margin-top:6px}
+li::marker{color:var(--accent)}
+strong{color:var(--text-0);font-weight:600}
+.doc a{color:#b3a9ff;text-underline-offset:3px}
+.doc a:hover{color:var(--accent-2)}
+.note{margin-top:12px;padding:12px 14px;border:1px solid rgba(109,92,255,.25);background:var(--accent-soft);border-radius:var(--r-md);font-size:14px;color:var(--text-0);max-width:75ch}
+
+.foot{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:center;margin-top:24px;font-size:12px;color:var(--text-2)}
+.foot a{color:var(--text-2);text-decoration:none}
+.foot a:hover{color:var(--text-0)}
+.foot .sep{width:3px;height:3px;border-radius:50%;background:var(--text-2);opacity:.5;align-self:center}
+
+ol{padding-left:22px}
+h3{font-size:15px;font-weight:600;color:var(--text-0);margin:18px 0 6px}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-2);border:1px solid var(--line-soft);border-radius:5px;padding:1px 5px;color:var(--text-1)}
+.fineprint{margin-top:14px;font-size:12.5px;color:var(--text-2);border-top:1px solid var(--line-soft);padding-top:12px}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#262c38;border-radius:999px;border:2px solid var(--bg-1)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rise{opacity:1;transform:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"><div class="grid-bg"></div><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+
+<div class="shell">
+
+  <header class="topbar rise" style="--i:0">
+    <a class="brand" href="https://ebice.site/" aria-label="Ebice home">
+      <div class="brand-mark">E</div>
+      <div>
+        <div class="brand-name">Ebice</div>
+        <div class="brand-sub">Roblox Lua obfuscator</div>
+      </div>
+    </a>
+    <div class="spacer"></div>
+    <a class="btn" href="https://ebice.site/">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to obfuscator
+    </a>
+  </header>
+
+  <div class="layout">
+
+    <nav class="toc rise" style="--i:1" aria-label="Table of contents">
+      <div class="toc-title">On this page</div>
+      <a href="#scope">1. What is protected</a>
+      <a href="#licence">2. What you may do</a>
+      <a href="#yours">3. What stays yours</a>
+      <a href="#copycat">4. Found a copycat?</a>
+      <a href="#notice">5. Sending a takedown notice</a>
+      <a href="#counter">6. Counter-notice</a>
+      <a href="#automated">7. Bots and AI harvesters</a>
+      <a href="#contact">8. Contact</a>
+    </nav>
+
+        <article class="doc rise" style="--i:2">
+      <div class="doc-head">
+        <h1>Copyright, copycats &amp; takedown</h1>
+        <span class="updated">Last updated: October 27, 2026</span>
+        <p class="intro">Ebice is a free tool, not free content to re-sell. This page says exactly what belongs to whom, what you may do with it, and the quickest way to resolve a claim — with or without a lawyer. This page is a policy, not legal advice.</p>
+      </div>
+
+      <section id="scope">
+        <h2>1. What is protected</h2>
+        <p>Unless a file says otherwise, everything in this repository and on ebice.site is <strong>all rights reserved</strong> by the owner of Ebice. That includes:</p>
+        <ul>
+          <li>the interface: layout, styling, colour system, icons drawn for the site, and the wording of every page;</li>
+          <li>the obfuscation engine — the JavaScript that renames symbols, encodes strings and injects control flow;</li>
+          <li>the <strong>Ebice</strong> name, the “E” mark, the logo and the social preview image (<code>og-image.png</code>, <code>favicon.png</code>);</li>
+          <li>the legal pages themselves, including this one.</li>
+        </ul>
+        <p>The site is published from a public repository so users can audit what runs on their machine. Audit is not a licence: reading the code is allowed, republishing it as your own product is not. See <a href="https://ebice.site/terms/">the Terms of Service</a>, section 5.</p>
+      </section>
+
+      <section id="licence">
+        <h2>2. What you may do</h2>
+        <ul>
+          <li><strong>Link</strong> to https://ebice.site/ from anywhere, including commercial pages, with no permission needed.</li>
+          <li><strong>Quote</strong> a short extract (a few sentences or one screenshot) with a visible credit and a link to the canonical page.</li>
+          <li><strong>Use and share the output</strong> of the obfuscator. The generated Lua is yours; the header comment inside it is a technical marker, not a claim over your code.</li>
+          <li><strong>Fork privately</strong> for your own experiments. Public mirrors, “ Ebice 2.0” clones and paid wrappers are not licensed.</li>
+        </ul>
+        <p>Anything else — hosting the site under another name or domain, removing the copyright notice, keeping our AdSense id while charging for access, packaging the engine as an app or a Discord bot, or scraping the pages into a dataset or a model — needs written permission. Ask, the answer is often yes with attribution.</p>
+      </section>
+
+      <section id="yours">
+        <h2>3. What stays yours</h2>
+        <p><strong>You keep all rights to the Lua you paste in and to the code that comes back out.</strong> Ebice stores nothing, uploads nothing, and claims nothing. There is no account, no database and no server-side copy of your script, so there is nothing here for anyone to take from you.</p>
+        <p>Two markers exist in the output and both are switches you can turn off in “Output &amp; privacy”:</p>
+        <ul>
+          <li><strong>Signed header</strong> — a comment naming the tool, the active layers and a timestamp. It advertises the tool that produced the file; it does not transfer anything.</li>
+          <li><strong>Ownership stamp</strong> — a short one-way fingerprint of <em>your</em> source text, so if a script leaks you can show that a given file was produced from a given source. It is not a signature, not encryption, and it contains no name, no e-mail, no machine and no file name.</li>
+        </ul>
+        <p>If someone takes your obfuscated script, the stamp does not prove who wrote it — it proves which source produced which output. Keep your own repository history; that is the part that wins arguments.</p>
+      </section>
+
+      <section id="copycat">
+        <h2>4. Found a copycat?</h2>
+        <p>Ebice is a static page, so anything “installed” on the client is a deterrent, not a wall. What the site already does about copies, and what it cannot do:</p>
+        <ul>
+          <li>an unknown domain gets a notice and is sent back to ebice.site;</li>
+          <li>any AdSense publisher id that is not the owner’s is deleted before it can bill;</li>
+          <li>a copy that strips the guard file logs a warning and loses its “genuine domain” marker;</li>
+          <li>framing the page inside someone else’s site is refused;</li>
+          <li>what no client-side trick can stop: a determined copy-paster with an editor. That is what the two routes below are for.</li>
+        </ul>
+        <p><strong>Report a copycat</strong> to <a href="#" data-mail="contact" data-domain="ebice.site">contact [at] ebice.site</a> with the URL, a screenshot and one line about how it is being used. Every report is read. Where the host offers a copyright or impersonation process, that is the fastest lever, and a public record of the request is often enough on its own.</p>
+
+        <h3>If you are the copycat and would rather not deal with any of this</h3>
+        <p>Say so in the same address. A working, credited mirror is usually settled in one e-mail: keep the notice, link back, do not charge for access, and the report never has to be filed.</p>
+      </section>
+
+      <section id="notice">
+        <h2>5. Sending a takedown notice</h2>
+        <p>For material on this site that infringes <em>your</em> copyright, send a written notice containing all six items below (the requirements of 17 U.S.C. §512(c)(3)). A notice without them usually cannot be acted on — that is the law, not a policy choice:</p>
+        <ol>
+          <li>identification of the copyrighted work you own (title, and where the original is published);</li>
+          <li>the exact URL(s) on ebice.site and enough detail to find the material;</li>
+          <li>your name, postal address, telephone number and e-mail;</li>
+          <li>a statement that you believe in good faith that the use is not authorised by you, your agent or the law;</li>
+          <li>a statement, under penalty of perjury, that the information above is accurate and that you are the owner or authorised to act for the owner;</li>
+          <li>your physical or electronic signature.</li>
+        </ol>
+        <p>Send it by e-mail to <a href="#" data-mail="contact" data-domain="ebice.site">contact [at] ebice.site</a> with the subject line <code>DMCA — &lt;page&gt;</code>. This is a static site: removals are usually done the same day, and a public copy is replaced on the next deploy. Misrepresentation claims are on the sender, so do not file a notice to settle a dispute over who wrote a Lua script.</p>
+        <p>Hosting does not give the copyright holder much to work with either: GitHub, which serves this repository, has its own DMCA process at <a href="https://docs.github.com/en/site-content-policy" target="_blank" rel="noopener noreferrer">docs.github.com</a> and it is faster to escalate there than to fight the page itself.</p>
+      </section>
+
+      <section id="counter">
+        <h2>6. Counter-notice</h2>
+        <p>If you believe something was removed by mistake or that your use is lawful, reply with: your contact details, the URL of the removed material, a statement under penalty of perjury that you have a good-faith belief it was removed by error or misidentification, and your consent to the jurisdiction of the district court for where you live (or, outside the United States, any district where the host may be found). The material is restored after 10–14 business days unless the claimant tells us they have filed an action.</p>
+      </section>
+
+      <section id="automated">
+        <h2>7. Bots and AI harvesters</h2>
+        <p>robots.txt disallows the known training and data-harvesting crawlers, and the pages carry <code>noai</code> / <code>noimageai</code> signals. Those are instructions, not locks: a crawler that ignores them is still scraping, and no licence to train on, mirror or re-host Ebice is granted by anything on this site. Bulk fetching that degrades the service is also a breach of section 3 of the Terms.</p>
+      </section>
+
+      <section id="contact">
+        <h2>8. Contact</h2>
+        <p>Rights holder and admin for everything on this domain: <a href="#" data-mail="contact" data-domain="ebice.site">contact [at] ebice.site</a>. For security reports use <a href="https://ebice.site/.well-known/security.txt">/.well-known/security.txt</a>. Please allow five business days before escalating.</p>
+        <p class="fineprint">Keep in mind: this page describes the policy the site follows. It is not a substitute for advice from a lawyer qualified in your country, and it does not create any licence that is not written here in plain words.</p>
+      </section>
+    </article>
+  </div>
+
+  <footer class="foot">
+    <a href="https://ebice.site/">Obfuscator</a><span class="sep"></span>
+    <a href="https://ebice.site/terms/">Terms</a><span class="sep"></span>
+    <span>Copyright &amp; takedown</span><span class="sep"></span>
+    <span>&copy; <span id="year">2026</span> Ebice</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Assembled at runtime so address harvesters do not find a mailto: in the HTML.
+  document.querySelectorAll('a[data-mail]').forEach((a) => {
+    const addr = a.getAttribute('data-mail') + '@' + a.getAttribute('data-domain');
+    a.setAttribute('href', 'mailto:' + addr + '?subject=' + encodeURIComponent('DMCA / copycat — ' + location.hostname));
+    a.textContent = addr;
+  });
+
+  // Highlight the table-of-contents entry for the section being read.
+  const links = [...document.querySelectorAll('.toc a')];
+  const byId = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        links.forEach(l => l.classList.remove('active'));
+        const a = byId.get(en.target.id);
+        if (a) a.classList.add('active');
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    document.querySelectorAll('.doc section[id]').forEach(s => io.observe(s));
+  }
+})();
+</script>
+</body>
+</html>

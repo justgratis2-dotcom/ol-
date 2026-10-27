@@ -1,0 +1,33 @@
+Copyright (c) 2026 Ebice / ebice.site — All rights reserved.
+
+This repository contains the source of a web page (HTML, CSS, JavaScript,
+images, and the written content of its pages). It is published so that users can
+see exactly what runs in their browser. Publishing it is not licensing it.
+
+1. NO LICENSE IS GRANTED to copy, mirror, re-host, rebrand, resell, sublicense,
+   bundle (as a Discord/Roblox "script" product, an app, a template, a starter
+   kit, an AI training set, or otherwise), or make the site available to third
+   parties under a different domain or name. Non-public modification for your own
+   use on your own machine is fine.
+
+2. WHAT YOU MAY DO WITHOUT ASKING: link to https://ebice.site/ from anywhere;
+   quote a short extract with visible credit and a link to the canonical page;
+   read, run and study the code locally.
+
+3. YOUR CODE IS YOURS. The Lua you paste and the Lua the tool produces are not
+   covered by this file at all — no rights are claimed over them, and using the
+   tool grants nothing to anybody. If you obfuscate a third party's script you
+   have not acquired any rights in it.
+
+4. The name "Ebice", the "E" mark, the logo and og-image.png are branding and are
+   not licensed by this file, by the repository being public, or by any of the
+   permissions above.
+
+5. The only interface between you and this code is the browser. There is no
+   warranty, and no liability, as set out in https://ebice.site/terms/ (which also
+   governs use of the hosted site). For permission requests, mirrors that already
+   exist, and takedowns: https://ebice.site/dmca/
+
+Third-party material: Google Fonts (Space Grotesk, JetBrains Mono) are served from
+fonts.gstatic.com under the SIL Open Font License; Google AdSense code is served by
+Google under its own terms. Neither is redistributed here.

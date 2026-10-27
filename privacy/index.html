@@ -1,11 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ebice="doc">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07080b">
+<!-- ebice:guard:begin ========================================================
+     Ebice integrity bootstrap — the ONE place to edit when the domain changes.
+     · add / remove hostnames in `allow` (and `allowPath` for Pages sub-paths)
+     · set guard:false (or load the page with ?guard=off) to switch every layer off
+     The companion layer lives in assets/site-guard.js and reads this config.
+     Keep every page byte-identical: `npm test` fails if they drift.
+     ======================================================================== -->
+<style>html[data-ebice-guard="blocked"] body{background:#07080b}html[data-ebice-guard="blocked"] body>*:not([data-ebice-notice]){display:none!important}</style>
+<script>
+(function () {
+  var CFG = {
+    site: 'ebice.site',
+    canonical: 'https://ebice.site/',
+    adClient: 'ca-pub-7924204418079811',   // foreign publisher ids get stripped, never billed
+    guard: true,                            // false = disable every protection layer
+    allow: ['ebice.site', 'www.ebice.site'],  // exact hostnames that may serve this site
+    allowPath: [                                  // exact host + path prefix, for Pages previews
+      { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
+    ],
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev']
+  };
+  var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
+  function suffix(list, h) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-list[i].length - 1) === '.' + list[i]) return true;
+    return false;
+  }
+  // `dev` = a machine or a preview URL, where every layer stands down (it would
+  // otherwise block your own localhost run and the deploy preview).
+  dev = !host || host === '[::1]' || !!location.port || suffix(CFG.preview, host);
+  var exact = CFG.allow.indexOf(host) !== -1;
+  var pages = false;
+  for (var i = 0; i < CFG.allowPath.length; i++) {
+    if (host === CFG.allowPath[i].host && path.indexOf(CFG.allowPath[i].path) === 0) pages = true;
+  }
+  var off = !CFG.guard || /[?&#]guard=off/.test(location.search + location.hash);
+  try { if (sessionStorage.getItem('ebice-guard') === 'off') off = true; } catch (e) {}
+  var authorized = off || dev || exact || pages;
+  CFG.host = host; CFG.dev = dev; CFG.off = off; CFG.authorized = authorized;
+  CFG.allows = function (h) { return !h || exact || suffix(CFG.allow, h) || suffix(CFG.preview, h); };
+  window.__ebiceGuard = CFG;
+  if (!authorized) document.documentElement.setAttribute('data-ebice-guard', 'blocked');
+  window.addEventListener('load', function () {
+    if (!off && !window.__ebiceGuardLoaded && window.console) {
+      console.warn('[ebice] assets/site-guard.js did not load — this copy is incomplete.');
+    }
+  });
+})();
+</script>
+<script src="../assets/site-guard.js" defer></script>
+<!-- ebice:guard:end -->
 <title>Privacy Policy — Ebice</title>
 <meta name="description" content="Privacy Policy for Ebice, the Roblox Lua obfuscator: what we collect, cookies, advertising and your rights.">
+<link rel="canonical" href="https://ebice.site/privacy/">
+<link rel="license" href="https://ebice.site/terms/">
+<meta name="author" content="Ebice — ebice.site">
+<meta name="robots" content="max-image-preview:large, noai, noimageai">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- Only object/base/form: a script-src or frame-src allowlist would silently
+     break AdSense the next time Google adds a host. The full policy for hosts
+     that read response headers is in docs/cloudflare/_headers. -->
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +194,7 @@ tr:last-child td{border-bottom:0}
       <div class="doc-head">
         <h1>Privacy Policy</h1>
         <span class="updated">Last updated: October 27, 2026</span>
-        <p class="intro">This policy explains what information Ebice (ebice.site) collects when you visit the site, how it is used, and the choices you have. It applies together with our <a href="https://ebice.site/terms">Terms of Service</a>.</p>
+        <p class="intro">This policy explains what information Ebice (ebice.site) collects when you visit the site, how it is used, and the choices you have. It applies together with our <a href="https://ebice.site/terms/">Terms of Service</a>.</p>
       </div>
 
       <section id="who">
@@ -146,7 +205,13 @@ tr:last-child td{border-bottom:0}
       <section id="code">
         <h2>2. Your code stays on your device</h2>
         <p>The obfuscation tool runs entirely in your browser. The Lua code you paste or load is processed locally and <strong>is not uploaded to our servers</strong> by the tool. We do not see, store or share your scripts or the obfuscated output.</p>
-        <div class="note">Closing or refreshing the page clears your code. Keep your own copy of your original source.</div>
+        <p>The page writes nothing to storage on its own: no cookies, no <code>localStorage</code>, no analytics, no crash reporting, and no request to any server of ours. The content-security policy forbids the page from submitting a form or loading a plug-in, and it carries no form at all.</p>
+        <p>Two comment lines can be added to the file you download or copy, both of them switches you control under “Output &amp; privacy”:</p>
+        <ul>
+          <li><strong>Signed header</strong> — the name and version of the tool, the list of active layers and a timestamp. It contains nothing about you.</li>
+          <li><strong>Ownership stamp</strong> — a short one-way fingerprint of your source text, so you can later show that a given output was produced from a given file. It is not a signature, not encryption, and no copy of it is kept anywhere.</li>
+        </ul>
+        <div class="note">Closing or refreshing the page clears your code — “Wipe on close” is on by default, and “Your code never leaves this tab”. Keep your own copy of your original source.</div>
       </section>
 
       <section id="collect">
@@ -169,8 +234,8 @@ tr:last-child td{border-bottom:0}
         <h2>4. Cookies and advertising</h2>
         <p>Ebice is funded by advertising served by <strong>Google AdSense</strong>. Google and its partners may use cookies, mobile identifiers and similar technologies to show ads based on your previous visits to this and other websites, and to measure ad performance.</p>
         <ul>
-          <li>Where required by law (for example in the European Economic Area and the United Kingdom), personalized advertising is only used if you give consent through the cookie banner.</li>
-          <li>You can change your choice at any time through the consent settings on this site, if available, or by clearing your browser cookies.</li>
+          <li>Where required by law (the European Economic Area, the United Kingdom and Switzerland), personalized advertising is only used after you consent through the consent message shown on this site. That message comes from a consent management platform certified by Google and integrated with the IAB Transparency and Consent Framework, so the consent record is kept by Google and by you in your own browser, not by us.</li>
+          <li>You can change your choice at any time through the same consent message, through the advertising settings links below, or by clearing this site's cookies.</li>
           <li>You can opt out of personalized ads in <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google Ad Settings</a> or via <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer">aboutads.info</a> and <a href="https://www.youronlinechoices.eu" target="_blank" rel="noopener noreferrer">youronlinechoices.eu</a>.</li>
           <li>To learn how Google uses data from sites that use its services, see <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">policies.google.com/technologies/partner-sites</a>.</li>
         </ul>
@@ -219,7 +284,9 @@ tr:last-child td{border-bottom:0}
 
       <section id="security">
         <h2>10. Security</h2>
-        <p>We serve the site over HTTPS and keep the data we handle to a minimum. No online service is completely secure, so we cannot guarantee absolute security.</p>
+        <p>We keep the data we handle to a minimum: there is no account, no database and nothing to breach on our side. On the page itself we run a content-security policy that blocks <code>&lt;base&gt;</code> hijacking, plug-ins and form submissions, we refuse to render the page inside another site's frame, we discard advertising code that does not belong to the site owner, and the pages that host the tool build their interface without injecting any of your text as markup.</p>
+        <p>The site also checks the domain it is being served from. That check exists to stop copies of the tool being run elsewhere; it never inspects your files, your code or anything else on your machine, and it reports nothing to us.</p>
+        <p>No online service is completely secure, so we cannot guarantee absolute security, and a determined person with a browser can always read what a page sends to their own device. Do not put secrets in a script that you expect obfuscation to protect.</p>
       </section>
 
       <section id="changes">
@@ -236,7 +303,7 @@ tr:last-child td{border-bottom:0}
 
   <footer class="foot">
     <a href="https://ebice.site/">Obfuscator</a><span class="sep"></span>
-    <a href="https://ebice.site/terms">Terms of Service</a><span class="sep"></span>
+    <a href="https://ebice.site/terms/">Terms of Service</a><span class="sep"></span>
     <span>Privacy Policy</span><span class="sep"></span>
     <span>&copy; <span id="year">2026</span> Ebice</span>
   </footer>
