@@ -1,11 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ebice="doc">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07080b">
+<!-- ebice:guard:begin ========================================================
+     Ebice integrity bootstrap — the ONE place to edit when the domain changes.
+     · add / remove hostnames in `allow` (and `allowPath` for Pages sub-paths)
+     · set guard:false (or load the page with ?guard=off) to switch every layer off
+     The companion layer lives in assets/site-guard.js and reads this config.
+     Keep every page byte-identical: `npm test` fails if they drift.
+     ======================================================================== -->
+<style>html[data-ebice-guard="blocked"] body{background:#07080b}html[data-ebice-guard="blocked"] body>*:not([data-ebice-notice]){display:none!important}</style>
+<script>
+(function () {
+  var CFG = {
+    site: 'ebice.site',
+    canonical: 'https://ebice.site/',
+    adClient: 'ca-pub-7924204418079811',   // foreign publisher ids get stripped, never billed
+    guard: true,                            // false = disable every protection layer
+    allow: ['ebice.site', 'www.ebice.site'],  // exact hostnames that may serve this site
+    allowPath: [                                  // exact host + path prefix, for Pages previews
+      { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
+    ],
+    // Sandboxes and deploy previews: the guard stands down here so you can always
+    // debug your own copy. Trim this list - every entry is also a hole a copycat
+    // could hide in (SECURITY.md, "Limits").
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev', 'e2b.app', 'codesandbox.io', 'stackblitz.io']
+  };
+  var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
+  function suffix(list, h) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-list[i].length - 1) === '.' + list[i]) return true;
+    return false;
+  }
+  // `dev` = a machine or a preview URL, where every layer stands down (it would
+  // otherwise block your own localhost run and the deploy preview).
+  dev = !host || host === '[::1]' || !!location.port || suffix(CFG.preview, host);
+  var exact = CFG.allow.indexOf(host) !== -1;
+  var pages = false;
+  for (var i = 0; i < CFG.allowPath.length; i++) {
+    if (host === CFG.allowPath[i].host && path.indexOf(CFG.allowPath[i].path) === 0) pages = true;
+  }
+  var off = !CFG.guard || /[?&#]guard=off/.test(location.search + location.hash);
+  try { if (sessionStorage.getItem('ebice-guard') === 'off') off = true; } catch (e) {}
+  var authorized = off || dev || exact || pages;
+  CFG.host = host; CFG.dev = dev; CFG.off = off; CFG.authorized = authorized;
+  CFG.allows = function (h) { return !h || exact || suffix(CFG.allow, h) || suffix(CFG.preview, h); };
+  window.__ebiceGuard = CFG;
+  if (!authorized) document.documentElement.setAttribute('data-ebice-guard', 'blocked');
+  window.addEventListener('load', function () {
+    if (!off && !window.__ebiceGuardLoaded && window.console) {
+      console.warn('[ebice] assets/site-guard.js did not load — this copy is incomplete.');
+    }
+  });
+})();
+</script>
+<script src="../assets/site-guard.js" defer></script>
+<!-- ebice:guard:end -->
 <title>Terms of Service — Ebice</title>
 <meta name="description" content="Terms of Service for Ebice, the Roblox Lua obfuscator.">
+<link rel="canonical" href="https://ebice.site/terms/">
+<link rel="license" href="https://ebice.site/terms/">
+<meta name="author" content="Ebice — ebice.site">
+<meta name="robots" content="max-image-preview:large, noai, noimageai">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- Only object/base/form: a script-src or frame-src allowlist would silently
+     break AdSense the next time Google adds a host. The full policy for hosts
+     that read response headers is in docs/cloudflare/_headers. -->
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d5cff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial,sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EE%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,7 +156,7 @@ strong{color:var(--text-0);font-weight:600}
 <div class="shell">
 
   <header class="topbar rise" style="--i:0">
-    <a class="brand" href="/" aria-label="Ebice home">
+    <a class="brand" href="https://ebice.site/" aria-label="Ebice home">
       <div class="brand-mark">E</div>
       <div>
         <div class="brand-name">Ebice</div>
@@ -116,14 +178,15 @@ strong{color:var(--text-0);font-weight:600}
       <a href="#service">2. The service</a>
       <a href="#use">3. Acceptable use</a>
       <a href="#ownership">4. Your code</a>
-      <a href="#security">5. No security guarantee</a>
-      <a href="#ads">6. Ads &amp; cookies</a>
-      <a href="#privacy">7. Data handling</a>
-      <a href="#warranty">8. Warranty</a>
-      <a href="#liability">9. Liability</a>
-      <a href="#changes">10. Changes &amp; termination</a>
-      <a href="#law">11. Governing law</a>
-      <a href="#contact">12. Contact</a>
+      <a href="#copies">5. Copies &amp; scraping</a>
+      <a href="#security">6. No security guarantee</a>
+      <a href="#ads">7. Ads &amp; cookies</a>
+      <a href="#privacy">8. Data handling</a>
+      <a href="#warranty">9. Warranty</a>
+      <a href="#liability">10. Liability</a>
+      <a href="#changes">11. Changes &amp; termination</a>
+      <a href="#law">12. Governing law</a>
+      <a href="#contact">13. Contact</a>
     </nav>
 
     <article class="doc rise" style="--i:2">
@@ -161,58 +224,72 @@ strong{color:var(--text-0);font-weight:600}
         <h2>4. Your code and our service</h2>
         <p><strong>You keep all rights to the code you submit</strong> and to the output you generate. We claim no ownership over your scripts. You are solely responsible for the code you obfuscate and for how you use the output.</p>
         <p>The Ebice name, logo, interface design and the Service itself are owned by us and protected by applicable intellectual property laws. These Terms do not grant you any right to copy, resell or redistribute the Service.</p>
+              <p>The generated file may open with two optional comment lines: a header naming the tool, its version, the active layers and a timestamp, and an "ownership stamp" holding a one-way fingerprint of the source you submitted. Both are on by default, both can be switched off in “Output &amp; privacy”, and neither contains your name, contact details, file name or machine. They are technical markers: nothing in them transfers any right in your code to us.</p>
+      </section>
+
+      <section id="copies">
+        <h2>5. Copies, mirrors and scraping</h2>
+        <p>The interface, its code and its wording are ours. Without written permission you may not:</p>
+        <ul>
+          <li>host this site, a modified version of it, or something a visitor could mistake for it, on another domain or under another name;</li>
+          <li>remove or alter the copyright notice, the licence reference, or the checks the page performs on where it is being served from;</li>
+          <li>sell, bundle, whitelist-gate or give away the tool as part of another product, or use the Ebice name to imply endorsement;</li>
+          <li>fetch the pages in bulk to build a dataset, a model training corpus, or a competing service.</li>
+        </ul>
+        <p>What you may do without asking — link to us, quote briefly with credit, use and share your own output — is written out at <a href="https://ebice.site/dmca/">/dmca/</a>.</p>
+        <div class="note">Disclosure, so nothing here is a surprise: when the page detects that it is being served from a domain we have not licensed, it shows a notice and returns the visitor to ebice.site; advertising code carrying a publisher id other than ours is deleted before it can run; the page refuses to render inside another site's frame; and text you select outside the editors gets the source appended when copied. All of it runs in the browser, and none of it reports anything to us. If you believe a check like this is interfering with legitimate access to your own copy, <a href="https://ebice.site/dmca/#contact">tell us</a> and it will be lifted.</div>
       </section>
 
       <section id="security">
-        <h2>5. No security guarantee</h2>
+        <h2>6. No security guarantee</h2>
         <p>Obfuscation makes code harder to read, but it is <strong>not encryption</strong> and cannot make a script impossible to reverse engineer. Anything that runs on a user's device can eventually be analyzed.</p>
         <div class="note">Never rely on obfuscation to protect secrets such as API keys, passwords or private tokens. Keep sensitive logic on the server.</div>
         <p style="margin-top:12px">We also do not guarantee that obfuscated output will run correctly in every environment. Always test the result before publishing it, and keep a copy of your original source code.</p>
       </section>
 
       <section id="ads">
-        <h2>6. Advertising and cookies</h2>
+        <h2>7. Advertising and cookies</h2>
         <p>The Service is supported by advertising. We use Google AdSense, which may use cookies and similar technologies to show ads based on your visits to this and other websites. Google's use of advertising cookies enables it and its partners to serve ads to you.</p>
         <p>You can manage personalized advertising through <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google Ad Settings</a> or learn more at <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer">aboutads.info</a>. We are not responsible for the content of third-party ads or the websites they link to.</p>
       </section>
 
       <section id="privacy">
-        <h2>7. Data handling</h2>
+        <h2>8. Data handling</h2>
         <p>The obfuscation itself runs in your browser: the code you paste is processed locally on your device and is not sent to our servers by the tool. Third-party services such as advertising providers may collect technical information (for example your IP address and browser details) under their own policies.</p>
         <p>If you add a separate Privacy Policy to the site, it forms part of these Terms.</p>
       </section>
 
       <section id="warranty">
-        <h2>8. Disclaimer of warranties</h2>
+        <h2>9. Disclaimer of warranties</h2>
         <p>The Service is provided <strong>"as is" and "as available"</strong>, without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, accuracy, availability and non-infringement. We do not warrant that the Service will be uninterrupted, error-free or free of harmful components.</p>
       </section>
 
       <section id="liability">
-        <h2>9. Limitation of liability</h2>
+        <h2>10. Limitation of liability</h2>
         <p>To the maximum extent permitted by law, Ebice and its owners will not be liable for any indirect, incidental, special, consequential or punitive damages, or for any loss of data, profits, accounts or goodwill, arising from your use of or inability to use the Service, including damage caused by broken or banned scripts.</p>
         <p>You agree to defend and hold us harmless from any claim arising from the code you submit or from your breach of these Terms.</p>
       </section>
 
       <section id="changes">
-        <h2>10. Changes and termination</h2>
+        <h2>11. Changes and termination</h2>
         <p>We may update these Terms from time to time. The "Last updated" date at the top shows when they last changed. Continuing to use the Service after an update means you accept the new Terms.</p>
         <p>We may suspend or end your access at any time if you breach these Terms or if we need to protect the Service or other users.</p>
       </section>
 
       <section id="law">
-        <h2>11. Governing law</h2>
+        <h2>12. Governing law</h2>
         <p>These Terms are governed by the laws of <strong>Spain</strong>, without regard to conflict-of-law rules. Any dispute will be handled by the competent courts of that jurisdiction, unless mandatory consumer law in your country says otherwise.</p>
       </section>
 
       <section id="contact">
-        <h2>12. Contact</h2>
+        <h2>13. Contact</h2>
         <p>Questions about these Terms? Reach us at <a href="mailto:contact@ebice.site">contact@ebice.site</a>.</p>
       </section>
     </article>
   </div>
 
   <footer class="foot">
-    <a href="/">Obfuscator</a><span class="sep"></span>
+    <a href="https://ebice.site/">Obfuscator</a><span class="sep"></span>
     <span>Terms of Service</span><span class="sep"></span>
     <span>&copy; <span id="year">2026</span> Ebice</span>
   </footer>

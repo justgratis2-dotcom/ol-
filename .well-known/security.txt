@@ -1,0 +1,11 @@
+# https://datatracker.ietf.org/doc/html/rfc9116
+# Reporting a vulnerability in ebice.site (the site is static: anything worth
+# reporting is a clone, an injected ad tag, or a bug that lets code leave the
+# browser). Details for owners and copycats: https://ebice.site/dmca/
+Contact: mailto:contact@ebice.site
+Contact: https://github.com/justgratis2-dotcom/ol-/issues/new?title=%5Bsecurity%5D
+Policy: https://ebice.site/terms/
+Preferred-Languages: en, es
+Canonical: https://ebice.site/.well-known/security.txt
+Expires: 2027-10-27T23:59:59.000Z
+# Optional next step: publish a key and re-sign this file as PGP armour.

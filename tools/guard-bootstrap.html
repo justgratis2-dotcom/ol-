@@ -1,0 +1,53 @@
+<!-- ebice:guard:begin ========================================================
+     Ebice integrity bootstrap — the ONE place to edit when the domain changes.
+     · add / remove hostnames in `allow` (and `allowPath` for Pages sub-paths)
+     · set guard:false (or load the page with ?guard=off) to switch every layer off
+     The companion layer lives in assets/site-guard.js and reads this config.
+     Keep every page byte-identical: `npm test` fails if they drift.
+     ======================================================================== -->
+<style>html[data-ebice-guard="blocked"] body{background:#07080b}html[data-ebice-guard="blocked"] body>*:not([data-ebice-notice]){display:none!important}</style>
+<script>
+(function () {
+  var CFG = {
+    site: 'ebice.site',
+    canonical: 'https://ebice.site/',
+    adClient: 'ca-pub-7924204418079811',   // foreign publisher ids get stripped, never billed
+    guard: true,                            // false = disable every protection layer
+    allow: ['ebice.site', 'www.ebice.site'],  // exact hostnames that may serve this site
+    allowPath: [                                  // exact host + path prefix, for Pages previews
+      { host: 'justgratis2-dotcom.github.io', path: '/ol-/' }
+    ],
+    // Sandboxes and deploy previews: the guard stands down here so you can always
+    // debug your own copy. Trim this list - every entry is also a hole a copycat
+    // could hide in (SECURITY.md, "Limits").
+    preview: ['localhost', '127.0.0.1', 'vercel.app', 'netlify.app', 'pages.dev', 'worker.dev', 'e2b.app', 'codesandbox.io', 'stackblitz.io']
+  };
+  var host = (location.hostname || '').toLowerCase(), path = location.pathname, dev = false;
+  function suffix(list, h) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-list[i].length - 1) === '.' + list[i]) return true;
+    return false;
+  }
+  // `dev` = a machine or a preview URL, where every layer stands down (it would
+  // otherwise block your own localhost run and the deploy preview).
+  dev = !host || host === '[::1]' || !!location.port || suffix(CFG.preview, host);
+  var exact = CFG.allow.indexOf(host) !== -1;
+  var pages = false;
+  for (var i = 0; i < CFG.allowPath.length; i++) {
+    if (host === CFG.allowPath[i].host && path.indexOf(CFG.allowPath[i].path) === 0) pages = true;
+  }
+  var off = !CFG.guard || /[?&#]guard=off/.test(location.search + location.hash);
+  try { if (sessionStorage.getItem('ebice-guard') === 'off') off = true; } catch (e) {}
+  var authorized = off || dev || exact || pages;
+  CFG.host = host; CFG.dev = dev; CFG.off = off; CFG.authorized = authorized;
+  CFG.allows = function (h) { return !h || exact || suffix(CFG.allow, h) || suffix(CFG.preview, h); };
+  window.__ebiceGuard = CFG;
+  if (!authorized) document.documentElement.setAttribute('data-ebice-guard', 'blocked');
+  window.addEventListener('load', function () {
+    if (!off && !window.__ebiceGuardLoaded && window.console) {
+      console.warn('[ebice] assets/site-guard.js did not load — this copy is incomplete.');
+    }
+  });
+})();
+</script>
+<script src="assets/site-guard.js" defer></script>
+<!-- ebice:guard:end -->
