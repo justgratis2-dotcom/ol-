@@ -3,3 +3,5 @@ Allow: /
 
 User-agent: Mediapartners-Google
 Allow: /
+
+Sitemap: https://ebice.site/sitemap.xml
